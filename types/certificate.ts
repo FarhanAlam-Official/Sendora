@@ -50,11 +50,14 @@ export interface CertificateTemplate {
 }
 
 export interface CertificateFieldMapping {
+  certificateTitle?: string // Excel column name for certificate title, or use default
   recipientName?: string // Excel column name
   awardMessage?: string // Excel column name for custom award message, or use default
+  subMessage?: string // Excel column name for sub-message below name, or use default
   courseTitle?: string
   date?: string
   organization?: string // Excel column name, or use default organizationName
+  signaturePosition?: string // Excel column name for position/title below signature (e.g., "Manager", "President")
   certificateNumber?: string
   customFields?: Array<{
     key: string
@@ -99,11 +102,14 @@ export interface CertificateSignature {
 }
 
 export interface CertificateFontSizes {
+  certificateTitle?: number
   recipientName?: number
   awardMessage?: number
+  subMessage?: number
   courseTitle?: number
   date?: number
   organization?: number
+  signaturePosition?: number
   certificateNumber?: number
 }
 
@@ -112,7 +118,10 @@ export interface CertificateConfig {
   fieldMapping: CertificateFieldMapping
   customStyles?: Partial<CertificateStyles>
   organizationName?: string // Default issuer name
+  defaultCertificateTitle?: string // Default certificate title (e.g., "Certificate of Appreciation")
   defaultAwardMessage?: string // Default award message (e.g., "This certificate is awarded to")
+  defaultSubMessage?: string // Default sub-message (e.g., "for completion of the course")
+  defaultSignaturePosition?: string // Default position below signature (e.g., "Manager")
   logo?: CertificateLogo
   signature?: CertificateSignature
   customFontSizes?: CertificateFontSizes // Override font sizes for each field

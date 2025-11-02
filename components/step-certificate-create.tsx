@@ -93,7 +93,10 @@ export default function StepCertificateCreate() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [signatureFile, setSignatureFile] = useState<File | null>(null)
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null)
+  const [defaultCertificateTitle, setDefaultCertificateTitle] = useState<string>("Certificate of Appreciation")
   const [defaultAwardMessage, setDefaultAwardMessage] = useState<string>("This certificate is awarded to")
+  const [defaultSubMessage, setDefaultSubMessage] = useState<string>("for completion of the course")
+  const [defaultSignaturePosition, setDefaultSignaturePosition] = useState<string>("Manager")
   const [customFontSizes, setCustomFontSizes] = useState<CertificateFontSizes>({})
 
   // Get first active recipient for preview
@@ -102,8 +105,17 @@ export default function StepCertificateCreate() {
   // Create sample data for preview if no data exists
   const getSampleRow = (): FileRow => {
     const sample: FileRow = {}
+    if (fieldMapping.certificateTitle) {
+      sample[fieldMapping.certificateTitle] = defaultCertificateTitle
+    }
     if (fieldMapping.recipientName) {
       sample[fieldMapping.recipientName] = "John Doe"
+    }
+    if (fieldMapping.awardMessage) {
+      sample[fieldMapping.awardMessage] = defaultAwardMessage
+    }
+    if (fieldMapping.subMessage) {
+      sample[fieldMapping.subMessage] = defaultSubMessage
     }
     if (fieldMapping.courseTitle) {
       sample[fieldMapping.courseTitle] = "Advanced Web Development"
@@ -114,8 +126,8 @@ export default function StepCertificateCreate() {
     if (fieldMapping.organization) {
       sample[fieldMapping.organization] = organizationName || "ABC Academy"
     }
-    if (fieldMapping.awardMessage) {
-      sample[fieldMapping.awardMessage] = defaultAwardMessage
+    if (fieldMapping.signaturePosition) {
+      sample[fieldMapping.signaturePosition] = defaultSignaturePosition
     }
     return sample
   }
@@ -368,7 +380,10 @@ export default function StepCertificateCreate() {
           fieldMapping,
           currentStyles,
           organizationName || undefined,
+          defaultCertificateTitle,
           defaultAwardMessage,
+          defaultSubMessage,
+          defaultSignaturePosition,
           logo,
           signature,
           customFontSizes,
@@ -500,7 +515,10 @@ export default function StepCertificateCreate() {
           fieldMapping,
           customStyles: currentStyles,
           organizationName: organizationName || undefined,
+          defaultCertificateTitle: defaultCertificateTitle,
           defaultAwardMessage: defaultAwardMessage,
+          defaultSubMessage: defaultSubMessage,
+          defaultSignaturePosition: defaultSignaturePosition,
           logo: logo,
           signature: signature,
           customFontSizes: customFontSizes,
@@ -513,7 +531,10 @@ export default function StepCertificateCreate() {
           fieldMapping,
           currentStyles,
           organizationName || undefined,
+          defaultCertificateTitle,
           defaultAwardMessage,
+          defaultSubMessage,
+          defaultSignaturePosition,
           logo,
           signature,
           customFontSizes,
@@ -1108,6 +1129,46 @@ export default function StepCertificateCreate() {
                 <h3 className="font-semibold text-lg">Award Message & Branding</h3>
               </div>
               
+              {/* Certificate Title */}
+              <div>
+                <Label htmlFor="certificate-title" className="mb-2 block">
+                  Certificate Title
+                </Label>
+                <Select
+                  value={fieldMapping.certificateTitle || "none"}
+                  onValueChange={(value) => {
+                    const newMapping = {
+                      ...fieldMapping,
+                      certificateTitle: value === "none" ? undefined : value,
+                    }
+                    setFieldMapping(newMapping)
+                    setCertificateFieldMapping(newMapping)
+                  }}
+                >
+                  <SelectTrigger id="certificate-title">
+                    <SelectValue placeholder="Use default or select column" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Use default below</SelectItem>
+                    {state.headers.map((header) => (
+                      <SelectItem key={header} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  id="default-certificate-title"
+                  value={defaultCertificateTitle}
+                  onChange={(e) => setDefaultCertificateTitle(e.target.value)}
+                  placeholder="Certificate of Appreciation"
+                  className="mt-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Used if certificate title column is not mapped
+                </p>
+              </div>
+
               {/* Award Message */}
               <div>
                 <Label htmlFor="award-message" className="mb-2 block">
@@ -1145,6 +1206,86 @@ export default function StepCertificateCreate() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Used if award message column is not mapped
+                </p>
+              </div>
+
+              {/* Sub Message */}
+              <div>
+                <Label htmlFor="sub-message" className="mb-2 block">
+                  Sub Message (Below Name)
+                </Label>
+                <Select
+                  value={fieldMapping.subMessage || "none"}
+                  onValueChange={(value) => {
+                    const newMapping = {
+                      ...fieldMapping,
+                      subMessage: value === "none" ? undefined : value,
+                    }
+                    setFieldMapping(newMapping)
+                    setCertificateFieldMapping(newMapping)
+                  }}
+                >
+                  <SelectTrigger id="sub-message">
+                    <SelectValue placeholder="Use default or select column" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Use default below</SelectItem>
+                    {state.headers.map((header) => (
+                      <SelectItem key={header} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  id="default-sub-message"
+                  value={defaultSubMessage}
+                  onChange={(e) => setDefaultSubMessage(e.target.value)}
+                  placeholder="for completion of the course"
+                  className="mt-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Used if sub-message column is not mapped
+                </p>
+              </div>
+
+              {/* Signature Position */}
+              <div>
+                <Label htmlFor="signature-position" className="mb-2 block">
+                  Signature Position/Title
+                </Label>
+                <Select
+                  value={fieldMapping.signaturePosition || "none"}
+                  onValueChange={(value) => {
+                    const newMapping = {
+                      ...fieldMapping,
+                      signaturePosition: value === "none" ? undefined : value,
+                    }
+                    setFieldMapping(newMapping)
+                    setCertificateFieldMapping(newMapping)
+                  }}
+                >
+                  <SelectTrigger id="signature-position">
+                    <SelectValue placeholder="Use default or select column" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Use default below</SelectItem>
+                    {state.headers.map((header) => (
+                      <SelectItem key={header} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  id="default-signature-position"
+                  value={defaultSignaturePosition}
+                  onChange={(e) => setDefaultSignaturePosition(e.target.value)}
+                  placeholder="Manager"
+                  className="mt-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Position/title shown below signature (e.g., "Manager", "President")
                 </p>
               </div>
 
@@ -1238,16 +1379,16 @@ export default function StepCertificateCreate() {
                 <h3 className="font-semibold text-lg">Font Sizes</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
                   <div>
-                    <Label className="text-xs mb-1 block">Recipient Name</Label>
+                    <Label className="text-xs mb-1 block">Certificate Title</Label>
                     <Input
                       type="number"
-                      value={customFontSizes.recipientName ?? getTemplate(selectedTemplate)?.fields.recipientName.fontSize ?? 32}
+                      value={customFontSizes.certificateTitle ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.fontSize ?? 36}
                       onChange={(e) => {
                         setCustomFontSizes((prev) => ({
                           ...prev,
-                          recipientName: Number.parseInt(e.target.value) || undefined,
+                          certificateTitle: Number.parseInt(e.target.value) || undefined,
                         }))
                       }}
                     />
@@ -1263,6 +1404,36 @@ export default function StepCertificateCreate() {
                         setCustomFontSizes((prev) => ({
                           ...prev,
                           awardMessage: Number.parseInt(e.target.value) || undefined,
+                        }))
+                      }}
+                    />
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Recipient Name</Label>
+                    <Input
+                      type="number"
+                      value={customFontSizes.recipientName ?? getTemplate(selectedTemplate)?.fields.recipientName.fontSize ?? 32}
+                      onChange={(e) => {
+                        setCustomFontSizes((prev) => ({
+                          ...prev,
+                          recipientName: Number.parseInt(e.target.value) || undefined,
+                        }))
+                      }}
+                    />
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Sub Message</Label>
+                    <Input
+                      type="number"
+                      value={customFontSizes.subMessage ?? getTemplate(selectedTemplate)?.fields.subMessage?.fontSize ?? 14}
+                      onChange={(e) => {
+                        setCustomFontSizes((prev) => ({
+                          ...prev,
+                          subMessage: Number.parseInt(e.target.value) || undefined,
                         }))
                       }}
                     />
@@ -1323,6 +1494,21 @@ export default function StepCertificateCreate() {
                         setCustomFontSizes((prev) => ({
                           ...prev,
                           certificateNumber: Number.parseInt(e.target.value) || undefined,
+                        }))
+                      }}
+                    />
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.signaturePosition && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Signature Position</Label>
+                    <Input
+                      type="number"
+                      value={customFontSizes.signaturePosition ?? getTemplate(selectedTemplate)?.fields.signaturePosition?.fontSize ?? 12}
+                      onChange={(e) => {
+                        setCustomFontSizes((prev) => ({
+                          ...prev,
+                          signaturePosition: Number.parseInt(e.target.value) || undefined,
                         }))
                       }}
                     />

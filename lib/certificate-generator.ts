@@ -49,7 +49,10 @@ export function generateCertificate(
   fieldMapping: CertificateFieldMapping,
   customStyles?: Partial<CertificateStyles>,
   organizationName?: string,
+  defaultCertificateTitle?: string,
   defaultAwardMessage?: string,
+  defaultSubMessage?: string,
+  defaultSignaturePosition?: string,
   logo?: CertificateLogo,
   signature?: CertificateSignature,
   customFontSizes?: CertificateFontSizes,
@@ -139,6 +142,25 @@ export function generateCertificate(
   // Set text color
   doc.setTextColor(...hexToRgb(finalStyles.primaryColor))
 
+  // Render certificate title (optional, appears at the top)
+  if (fields.certificateTitle) {
+    const certTitle = getFieldValue(recipientData, fieldMapping, "certificateTitle") || defaultCertificateTitle || "CERTIFICATE"
+    if (certTitle) {
+      const titlePos = fields.certificateTitle
+      const fontSize = customFontSizes?.certificateTitle ?? titlePos.fontSize
+      doc.setFontSize(fontSize)
+      doc.setFont(undefined, titlePos.fontWeight || "bold")
+      if (titlePos.color) {
+        doc.setTextColor(...hexToRgb(titlePos.color))
+      }
+      doc.text(certTitle.toUpperCase(), titlePos.x, titlePos.y, {
+        align: titlePos.align || "center",
+        maxWidth: width - 60,
+      })
+      doc.setTextColor(...hexToRgb(finalStyles.primaryColor))
+    }
+  }
+
   // Render award message (optional, appears before recipient name)
   if (fields.awardMessage) {
     const awardMsg = getFieldValue(recipientData, fieldMapping, "awardMessage") || defaultAwardMessage || "This certificate is awarded to"
@@ -174,6 +196,25 @@ export function generateCertificate(
       maxWidth: width - 60,
     })
     doc.setTextColor(...hexToRgb(finalStyles.primaryColor)) // Reset color
+  }
+
+  // Render sub-message (optional, appears below recipient name)
+  if (fields.subMessage) {
+    const subMsg = getFieldValue(recipientData, fieldMapping, "subMessage") || defaultSubMessage || ""
+    if (subMsg) {
+      const subPos = fields.subMessage
+      const fontSize = customFontSizes?.subMessage ?? subPos.fontSize
+      doc.setFontSize(fontSize)
+      doc.setFont(undefined, subPos.fontWeight || "normal")
+      if (subPos.color) {
+        doc.setTextColor(...hexToRgb(subPos.color))
+      }
+      doc.text(subMsg, subPos.x, subPos.y, {
+        align: subPos.align || "center",
+        maxWidth: width - 60,
+      })
+      doc.setTextColor(...hexToRgb(finalStyles.primaryColor))
+    }
   }
 
   // Render course title (optional)
@@ -253,8 +294,46 @@ export function generateCertificate(
         sigWidth,
         sigHeight,
       )
+
+      // Render signature position/title below signature (optional)
+      if (fields.signaturePosition) {
+        const sigPosition = getFieldValue(recipientData, fieldMapping, "signaturePosition") || defaultSignaturePosition || ""
+        if (sigPosition) {
+          const sigPosField = fields.signaturePosition
+          const fontSize = customFontSizes?.signaturePosition ?? sigPosField.fontSize
+          doc.setFontSize(fontSize)
+          doc.setFont(undefined, sigPosField.fontWeight || "normal")
+          if (sigPosField.color) {
+            doc.setTextColor(...hexToRgb(sigPosField.color))
+          }
+          // Position text below signature image
+          const positionY = sigY + sigHeight + 5 // 5mm below signature
+          doc.text(sigPosition, sigPosField.x ?? sigX + sigWidth / 2, positionY, {
+            align: sigPosField.align || "center",
+            maxWidth: sigWidth + 20,
+          })
+          doc.setTextColor(...hexToRgb(finalStyles.primaryColor))
+        }
+      }
     } catch (error) {
       console.error("Failed to add signature:", error)
+    }
+  } else if (fields.signaturePosition) {
+    // Render signature position even without signature image (text only)
+    const sigPosition = getFieldValue(recipientData, fieldMapping, "signaturePosition") || defaultSignaturePosition || ""
+    if (sigPosition) {
+      const sigPosField = fields.signaturePosition
+      const fontSize = customFontSizes?.signaturePosition ?? sigPosField.fontSize
+      doc.setFontSize(fontSize)
+      doc.setFont(undefined, sigPosField.fontWeight || "normal")
+      if (sigPosField.color) {
+        doc.setTextColor(...hexToRgb(sigPosField.color))
+      }
+      doc.text(sigPosition, sigPosField.x, sigPosField.y, {
+        align: sigPosField.align || "center",
+        maxWidth: width - 60,
+      })
+      doc.setTextColor(...hexToRgb(finalStyles.primaryColor))
     }
   }
 
@@ -311,7 +390,10 @@ export async function generateCertificateBatch(
   fieldMapping: CertificateFieldMapping,
   customStyles?: Partial<CertificateStyles>,
   organizationName?: string,
+  defaultCertificateTitle?: string,
   defaultAwardMessage?: string,
+  defaultSubMessage?: string,
+  defaultSignaturePosition?: string,
   logo?: CertificateLogo,
   signature?: CertificateSignature,
   customFontSizes?: CertificateFontSizes,
@@ -336,7 +418,10 @@ export async function generateCertificateBatch(
         fieldMapping,
         customStyles,
         organizationName,
+        defaultCertificateTitle,
         defaultAwardMessage,
+        defaultSubMessage,
+        defaultSignaturePosition,
         logo,
         signature,
         customFontSizes,
