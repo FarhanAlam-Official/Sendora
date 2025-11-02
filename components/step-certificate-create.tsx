@@ -609,336 +609,10 @@ export default function StepCertificateCreate() {
         </Alert>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Left Column: Configuration */}
-        <div className="space-y-6">
-          {/* Custom Template Upload */}
-          {useCustomTemplate ? (
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-lg">Upload Custom Template</h3>
-              </div>
-              
-              {!customTemplatePreview ? (
-                <div 
-                  className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
-                  onDragOver={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.currentTarget.classList.add("border-primary", "bg-primary/5")
-                  }}
-                  onDragLeave={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.currentTarget.classList.remove("border-primary", "bg-primary/5")
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.currentTarget.classList.remove("border-primary", "bg-primary/5")
-                    const file = e.dataTransfer.files?.[0]
-                    if (file) {
-                      handleCustomTemplateUpload(file)
-                    }
-                  }}
-                  onClick={() => {
-                    document.getElementById("custom-template-upload")?.click()
-                  }}
-                >
-                  <FileUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm font-medium mb-2">Upload your certificate template</p>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Export from Google Slides or Canva as PNG/JPG (recommended: 1920x1080px or similar)
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Drag and drop your image here, or click anywhere to browse
-                  </p>
-                  <input
-                    type="file"
-                    accept=".png,.jpg,.jpeg,image/png,image/jpeg,image/jpg"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        handleCustomTemplateUpload(file)
-                      }
-                      // Reset input value to allow re-uploading the same file
-                      e.target.value = ""
-                    }}
-                    className="hidden"
-                    id="custom-template-upload"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="relative border border-border rounded-lg overflow-hidden bg-muted/20">
-                    {/* Image Preview with Position Overlay */}
-                    <div 
-                      className="relative w-full cursor-crosshair"
-                      onMouseMove={(e) => {
-                        if (isDragging && customTemplatePreview && imageDimensions) {
-                          const img = e.currentTarget.querySelector("img")
-                          if (img) {
-                            const rect = img.getBoundingClientRect()
-                            const scaleX = imageDimensions.width / rect.width
-                            const scaleY = imageDimensions.height / rect.height
-                            const x = ((e.clientX - rect.left) * scaleX) * 0.264583
-                            const y = ((e.clientY - rect.top) * scaleY) * 0.264583
-                            setNamePosition((prev) => ({
-                              ...prev,
-                              x: Math.max(0, Math.min(x, imageDimensions.width * 0.264583)),
-                              y: Math.max(0, Math.min(y, imageDimensions.height * 0.264583)),
-                            }))
-                          }
-                        }
-                      }}
-                      onMouseUp={() => {
-                        setIsDragging(false)
-                      }}
-                      onMouseLeave={() => {
-                        setIsDragging(false)
-                      }}
-                      onClick={(e) => {
-                        if (!isDragging && customTemplatePreview && imageDimensions && previewRow) {
-                          const img = e.currentTarget.querySelector("img")
-                          if (img && e.target === img) {
-                            const rect = img.getBoundingClientRect()
-                            const scaleX = imageDimensions.width / rect.width
-                            const scaleY = imageDimensions.height / rect.height
-                            const x = ((e.clientX - rect.left) * scaleX) * 0.264583
-                            const y = ((e.clientY - rect.top) * scaleY) * 0.264583
-                            setNamePosition((prev) => ({
-                              ...prev,
-                              x: Math.max(0, Math.min(x, imageDimensions.width * 0.264583)),
-                              y: Math.max(0, Math.min(y, imageDimensions.height * 0.264583)),
-                            }))
-                          }
-                        }
-                      }}
-                    >
-                      <img
-                        src={customTemplatePreview}
-                        alt="Template preview"
-                        className="w-full h-auto pointer-events-none"
-                        onLoad={(e) => {
-                          const img = e.currentTarget
-                          if (img && !imageDimensions) {
-                            setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight })
-                          }
-                        }}
-                      />
-                      {/* Position Indicator Overlay - Visual Preview Box */}
-                      {imageDimensions && customTemplatePreview && previewRow && fieldMapping.recipientName && (() => {
-                        // Calculate the exact position to match jsPDF behavior (with offset applied)
-                        const imageWidthMM = imageDimensions.width * 0.264583
-                        const imageHeightMM = imageDimensions.height * 0.264583
-                        const adjustedX = namePosition.x + xOffset // Apply offset for preview accuracy
-                        const xPercent = (adjustedX / imageWidthMM) * 100
-                        const yPercent = (namePosition.y / imageHeightMM) * 100
-                        
-                        // For center alignment, the X position is the center point
-                        // For left alignment, X is the left edge
-                        // For right alignment, X is the right edge
-                        let leftStyle: string
-                        let transformStyle: string
-                        
-                        if (namePosition.align === "center") {
-                          leftStyle = `${xPercent}%`
-                          transformStyle = "translateX(-50%)"
-                        } else if (namePosition.align === "right") {
-                          leftStyle = `${xPercent}%`
-                          transformStyle = "translateX(-100%)"
-                        } else {
-                          leftStyle = `${xPercent}%`
-                          transformStyle = "none"
-                        }
-                        
-                        return (
-                          <div
-                            className="absolute border-2 border-primary border-dashed bg-primary/10 rounded-sm pointer-events-none"
-                            style={{
-                              left: leftStyle,
-                              top: `${yPercent}%`,
-                              padding: "8px 12px",
-                              transform: `${transformStyle} translateY(-50%)`,
-                              minWidth: "120px",
-                              zIndex: 10,
-                            }}
-                          >
-                          <div 
-                            className="text-sm font-semibold whitespace-nowrap text-primary"
-                            style={{
-                              fontSize: `${Math.max(12, Math.min(namePosition.fontSize / 3, 24))}px`,
-                              color: namePosition.fontColor,
-                              fontWeight: namePosition.fontWeight,
-                              textAlign: namePosition.align,
-                            }}
-                          >
-                            {previewRow[fieldMapping.recipientName] || "Name Preview"}
-                          </div>
-                          <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary rounded-full border-2 border-background flex items-center justify-center">
-                            <div className="w-2 h-2 bg-background rounded-full"></div>
-                          </div>
-                        </div>
-                        )
-                      })()}
-                      
-                      {/* Draggable Handle - positioned at exact X/Y coordinate */}
-                      {imageDimensions && customTemplatePreview && previewRow && fieldMapping.recipientName && (() => {
-                        const imageWidthMM = imageDimensions.width * 0.264583
-                        const imageHeightMM = imageDimensions.height * 0.264583
-                        const adjustedX = namePosition.x + xOffset // Apply offset for preview accuracy
-                        const xPercent = (adjustedX / imageWidthMM) * 100
-                        const yPercent = (namePosition.y / imageHeightMM) * 100
-                        
-                        return (
-                          <div
-                            className="absolute cursor-grab active:cursor-grabbing z-20"
-                            style={{
-                              left: `calc(${xPercent}% - 12px)`,
-                              top: `calc(${yPercent}% - 12px)`,
-                              width: "24px",
-                              height: "24px",
-                              borderRadius: "50%",
-                              backgroundColor: "hsl(var(--primary))",
-                              border: "3px solid hsl(var(--background))",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                            }}
-                            onMouseDown={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              setIsDragging(true)
-                            }}
-                          />
-                        )
-                      })()}
-                      
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 z-30"
-                        onClick={() => {
-                          setCustomTemplateFile(null)
-                          setCustomTemplatePreview(null)
-                          setImageDimensions(null)
-                        }}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                      
-                      {/* Help Text */}
-                      <div className="absolute bottom-2 left-2 right-2 pointer-events-none z-20">
-                        <div className="bg-background/90 backdrop-blur-sm rounded-lg p-2 text-xs text-muted-foreground text-center">
-                          💡 Click on the image to position the name, or drag the <span className="text-primary font-semibold">●</span> handle
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                    <h4 className="font-semibold text-sm">Name Position Settings</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Click on the image above to set position, or adjust manually below
-                    </p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">X Position (mm from left)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={namePosition.x.toFixed(1)}
-                          onChange={(e) => setNamePosition((prev) => ({ ...prev, x: Number.parseFloat(e.target.value) || 0 }))}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Y Position (mm from top)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={namePosition.y.toFixed(1)}
-                          onChange={(e) => setNamePosition((prev) => ({ ...prev, y: Number.parseFloat(e.target.value) || 0 }))}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">X Offset Adjustment (mm)</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            type="number"
-                            step="0.1"
-                            value={xOffset.toFixed(1)}
-                            onChange={(e) => setXOffset(Number.parseFloat(e.target.value) || 0)}
-                            placeholder="0.0"
-                          />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setXOffset(-25)}
-                            title="Apply -25mm offset (common fix)"
-                          >
-                            -25
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Adjust if text appears offset. Try -25 if text is too far right.
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-xs">Font Size</Label>
-                        <Input
-                          type="number"
-                          value={namePosition.fontSize}
-                          onChange={(e) => setNamePosition((prev) => ({ ...prev, fontSize: Number.parseInt(e.target.value) || 32 }))}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Text Color</Label>
-                        <Input
-                          type="color"
-                          value={namePosition.fontColor}
-                          onChange={(e) => setNamePosition((prev) => ({ ...prev, fontColor: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Alignment</Label>
-                        <Select
-                          value={namePosition.align}
-                          onValueChange={(value: "left" | "center" | "right") => setNamePosition((prev) => ({ ...prev, align: value }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="left">Left</SelectItem>
-                            <SelectItem value="center">Center</SelectItem>
-                            <SelectItem value="right">Right</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-xs">Font Weight</Label>
-                        <Select
-                          value={namePosition.fontWeight}
-                          onValueChange={(value: "normal" | "bold") => setNamePosition((prev) => ({ ...prev, fontWeight: value }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="normal">Normal</SelectItem>
-                            <SelectItem value="bold">Bold</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : null}
-          
-          {/* Template Selection */}
-          {!useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6">
+      <div className="space-y-6">
+        {/* Template Selection (Top - Full Width) */}
+        {!useCustomTemplate && (
+          <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Palette className="w-5 h-5 text-primary" />
@@ -1097,7 +771,7 @@ export default function StepCertificateCreate() {
                 </CollapsibleContent>
               </Collapsible>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {CERTIFICATE_TEMPLATES.map((template) => (
                 <button
                   key={template.id}
@@ -1119,15 +793,505 @@ export default function StepCertificateCreate() {
               ))}
             </div>
           </div>
-          )}
+        )}
 
-          {/* Award Message & Branding */}
-          {!useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-lg">Award Message & Branding</h3>
+        {/* Preview Section (Middle - Full Width) */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg">Certificate Preview</h3>
+            {previewRow && (
+              <Button 
+                onClick={generatePreview} 
+                variant="outline" 
+                size="sm"
+                disabled={!fieldMapping.recipientName || (useCustomTemplate && !customTemplateFile)}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Generate Preview
+              </Button>
+            )}
+          </div>
+          {showPreview && previewPdf ? (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <iframe
+                src={`data:application/pdf;base64,${previewPdf}`}
+                className="w-full h-[600px]"
+                title="Certificate Preview"
+              />
+            </div>
+          ) : (
+            <div className="border border-border rounded-lg p-12 text-center">
+              <Eye className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground">Click "Generate Preview" to see your certificate</p>
+            </div>
+          )}
+          {showPreview && previewPdf && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Preview for: {previewRow?.[fieldMapping.recipientName || ""] || "First recipient"}
+            </p>
+          )}
+        </div>
+
+        {/* Controls Section (Bottom - Two Columns) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Custom Template Upload */}
+            {useCustomTemplate && (
+              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold text-lg">Upload Custom Template</h3>
+                </div>
+                
+                {!customTemplatePreview ? (
+                  <div 
+                    className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      e.currentTarget.classList.add("border-primary", "bg-primary/5")
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      e.currentTarget.classList.remove("border-primary", "bg-primary/5")
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      e.currentTarget.classList.remove("border-primary", "bg-primary/5")
+                      const file = e.dataTransfer.files?.[0]
+                      if (file) {
+                        handleCustomTemplateUpload(file)
+                      }
+                    }}
+                    onClick={() => {
+                      document.getElementById("custom-template-upload")?.click()
+                    }}
+                  >
+                    <FileUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-sm font-medium mb-2">Upload your certificate template</p>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Export from Google Slides or Canva as PNG/JPG (recommended: 1920x1080px or similar)
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Drag and drop your image here, or click anywhere to browse
+                    </p>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,image/png,image/jpeg,image/jpg"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          handleCustomTemplateUpload(file)
+                        }
+                        e.target.value = ""
+                      }}
+                      className="hidden"
+                      id="custom-template-upload"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="relative border border-border rounded-lg overflow-hidden bg-muted/20">
+                      {/* Image Preview with Position Overlay */}
+                      <div 
+                        className="relative w-full cursor-crosshair"
+                        onMouseMove={(e) => {
+                          if (isDragging && customTemplatePreview && imageDimensions) {
+                            const img = e.currentTarget.querySelector("img")
+                            if (img) {
+                              const rect = img.getBoundingClientRect()
+                              const scaleX = imageDimensions.width / rect.width
+                              const scaleY = imageDimensions.height / rect.height
+                              const x = ((e.clientX - rect.left) * scaleX) * 0.264583
+                              const y = ((e.clientY - rect.top) * scaleY) * 0.264583
+                              setNamePosition((prev) => ({
+                                ...prev,
+                                x: Math.max(0, Math.min(x, imageDimensions.width * 0.264583)),
+                                y: Math.max(0, Math.min(y, imageDimensions.height * 0.264583)),
+                              }))
+                            }
+                          }
+                        }}
+                        onMouseUp={() => {
+                          setIsDragging(false)
+                        }}
+                        onMouseLeave={() => {
+                          setIsDragging(false)
+                        }}
+                        onClick={(e) => {
+                          if (!isDragging && customTemplatePreview && imageDimensions && previewRow) {
+                            const img = e.currentTarget.querySelector("img")
+                            if (img && e.target === img) {
+                              const rect = img.getBoundingClientRect()
+                              const scaleX = imageDimensions.width / rect.width
+                              const scaleY = imageDimensions.height / rect.height
+                              const x = ((e.clientX - rect.left) * scaleX) * 0.264583
+                              const y = ((e.clientY - rect.top) * scaleY) * 0.264583
+                              setNamePosition((prev) => ({
+                                ...prev,
+                                x: Math.max(0, Math.min(x, imageDimensions.width * 0.264583)),
+                                y: Math.max(0, Math.min(y, imageDimensions.height * 0.264583)),
+                              }))
+                            }
+                          }
+                        }}
+                      >
+                        <img
+                          src={customTemplatePreview}
+                          alt="Template preview"
+                          className="w-full h-auto pointer-events-none"
+                          onLoad={(e) => {
+                            const img = e.currentTarget
+                            if (img && !imageDimensions) {
+                              setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight })
+                            }
+                          }}
+                        />
+                        {/* Position Indicator Overlay */}
+                        {imageDimensions && customTemplatePreview && previewRow && fieldMapping.recipientName && (() => {
+                          const imageWidthMM = imageDimensions.width * 0.264583
+                          const imageHeightMM = imageDimensions.height * 0.264583
+                          const adjustedX = namePosition.x + xOffset
+                          const xPercent = (adjustedX / imageWidthMM) * 100
+                          const yPercent = (namePosition.y / imageHeightMM) * 100
+                          
+                          let leftStyle: string
+                          let transformStyle: string
+                          
+                          if (namePosition.align === "center") {
+                            leftStyle = `${xPercent}%`
+                            transformStyle = "translateX(-50%)"
+                          } else if (namePosition.align === "right") {
+                            leftStyle = `${xPercent}%`
+                            transformStyle = "translateX(-100%)"
+                          } else {
+                            leftStyle = `${xPercent}%`
+                            transformStyle = "none"
+                          }
+                          
+                          return (
+                            <div
+                              className="absolute border-2 border-primary border-dashed bg-primary/10 rounded-sm pointer-events-none"
+                              style={{
+                                left: leftStyle,
+                                top: `${yPercent}%`,
+                                padding: "8px 12px",
+                                transform: `${transformStyle} translateY(-50%)`,
+                                minWidth: "120px",
+                                zIndex: 10,
+                              }}
+                            >
+                              <div 
+                                className="text-sm font-semibold whitespace-nowrap text-primary"
+                                style={{
+                                  fontSize: `${Math.max(12, Math.min(namePosition.fontSize / 3, 24))}px`,
+                                  color: namePosition.fontColor,
+                                  fontWeight: namePosition.fontWeight,
+                                  textAlign: namePosition.align,
+                                }}
+                              >
+                                {previewRow[fieldMapping.recipientName] || "Name Preview"}
+                              </div>
+                              <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary rounded-full border-2 border-background flex items-center justify-center">
+                                <div className="w-2 h-2 bg-background rounded-full"></div>
+                              </div>
+                            </div>
+                          )
+                        })()}
+                        
+                        {/* Draggable Handle */}
+                        {imageDimensions && customTemplatePreview && previewRow && fieldMapping.recipientName && (() => {
+                          const imageWidthMM = imageDimensions.width * 0.264583
+                          const imageHeightMM = imageDimensions.height * 0.264583
+                          const adjustedX = namePosition.x + xOffset
+                          const xPercent = (adjustedX / imageWidthMM) * 100
+                          const yPercent = (namePosition.y / imageHeightMM) * 100
+                          
+                          return (
+                            <div
+                              className="absolute cursor-grab active:cursor-grabbing z-20"
+                              style={{
+                                left: `calc(${xPercent}% - 12px)`,
+                                top: `calc(${yPercent}% - 12px)`,
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                                backgroundColor: "hsl(var(--primary))",
+                                border: "3px solid hsl(var(--background))",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                              }}
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setIsDragging(true)
+                              }}
+                            />
+                          )
+                        })()}
+                        
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 z-30"
+                          onClick={() => {
+                            setCustomTemplateFile(null)
+                            setCustomTemplatePreview(null)
+                            setImageDimensions(null)
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                        
+                        <div className="absolute bottom-2 left-2 right-2 pointer-events-none z-20">
+                          <div className="bg-background/90 backdrop-blur-sm rounded-lg p-2 text-xs text-muted-foreground text-center">
+                            💡 Click on the image to position the name, or drag the <span className="text-primary font-semibold">●</span> handle
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-sm">Name Position Settings</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Click on the image above to set position, or adjust manually below
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs">X Position (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={namePosition.x.toFixed(1)}
+                            onChange={(e) => setNamePosition((prev) => ({ ...prev, x: Number.parseFloat(e.target.value) || 0 }))}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Y Position (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={namePosition.y.toFixed(1)}
+                            onChange={(e) => setNamePosition((prev) => ({ ...prev, y: Number.parseFloat(e.target.value) || 0 }))}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">X Offset (mm)</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              step="0.1"
+                              value={xOffset.toFixed(1)}
+                              onChange={(e) => setXOffset(Number.parseFloat(e.target.value) || 0)}
+                            />
+                            <Button variant="outline" size="sm" onClick={() => setXOffset(-25)}>
+                              -25
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Font Size</Label>
+                          <Input
+                            type="number"
+                            value={namePosition.fontSize}
+                            onChange={(e) => setNamePosition((prev) => ({ ...prev, fontSize: Number.parseInt(e.target.value) || 32 }))}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Text Color</Label>
+                          <Input
+                            type="color"
+                            value={namePosition.fontColor}
+                            onChange={(e) => setNamePosition((prev) => ({ ...prev, fontColor: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Alignment</Label>
+                          <Select
+                            value={namePosition.align}
+                            onValueChange={(value: "left" | "center" | "right") => setNamePosition((prev) => ({ ...prev, align: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="left">Left</SelectItem>
+                              <SelectItem value="center">Center</SelectItem>
+                              <SelectItem value="right">Right</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Font Weight</Label>
+                          <Select
+                            value={namePosition.fontWeight}
+                            onValueChange={(value: "normal" | "bold") => setNamePosition((prev) => ({ ...prev, fontWeight: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="bold">Bold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
+            )}
+
+            {/* Field Mapping */}
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Settings className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold text-lg">Map Fields</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="recipient-name" className="mb-2 block">
+                    Recipient Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={fieldMapping.recipientName || "none"}
+                    onValueChange={(value) => {
+                      const newMapping = {
+                        ...fieldMapping,
+                        recipientName: value === "none" ? undefined : value,
+                      }
+                      setFieldMapping(newMapping)
+                      setCertificateFieldMapping(newMapping)
+                    }}
+                  >
+                    <SelectTrigger id="recipient-name">
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {state.headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="course-title" className="mb-2 block">
+                    Course/Title (Optional)
+                  </Label>
+                  <Select
+                    value={fieldMapping.courseTitle || "none"}
+                    onValueChange={(value) => {
+                      const newMapping = {
+                        ...fieldMapping,
+                        courseTitle: value === "none" ? undefined : value,
+                      }
+                      setFieldMapping(newMapping)
+                      setCertificateFieldMapping(newMapping)
+                    }}
+                  >
+                    <SelectTrigger id="course-title">
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {state.headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="date" className="mb-2 block">
+                    Date (Optional)
+                  </Label>
+                  <Select
+                    value={fieldMapping.date || "none"}
+                    onValueChange={(value) => {
+                      const newMapping = {
+                        ...fieldMapping,
+                        date: value === "none" ? undefined : value,
+                      }
+                      setFieldMapping(newMapping)
+                      setCertificateFieldMapping(newMapping)
+                    }}
+                  >
+                    <SelectTrigger id="date">
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {state.headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="organization" className="mb-2 block">
+                    Organization/Issuer (Optional)
+                  </Label>
+                  <Select
+                    value={fieldMapping.organization || "none"}
+                    onValueChange={(value) => {
+                      const newMapping = {
+                        ...fieldMapping,
+                        organization: value === "none" ? undefined : value,
+                      }
+                      setFieldMapping(newMapping)
+                      setCertificateFieldMapping(newMapping)
+                    }}
+                  >
+                    <SelectTrigger id="organization">
+                      <SelectValue placeholder="Select column or use default" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Use default below</SelectItem>
+                      {state.headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="org-name" className="mb-2 block">
+                    Default Organization Name
+                  </Label>
+                  <Input
+                    id="org-name"
+                    value={organizationName}
+                    onChange={(e) => setOrganizationName(e.target.value)}
+                    placeholder="e.g., ABC Academy"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Used if organization column is not mapped or empty
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Award Message & Branding */}
+            {!useCustomTemplate && (
+              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold text-lg">Award Message & Branding</h3>
+                </div>
               
               {/* Certificate Title */}
               <div>
@@ -1371,382 +1535,208 @@ export default function StepCertificateCreate() {
             </div>
           )}
 
-          {/* Font Size Controls */}
-          {!useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Settings className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-lg">Font Sizes</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Certificate Title</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.certificateTitle ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.fontSize ?? 36}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          certificateTitle: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Award Message</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.awardMessage ?? getTemplate(selectedTemplate)?.fields.awardMessage?.fontSize ?? 14}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          awardMessage: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Recipient Name</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.recipientName ?? getTemplate(selectedTemplate)?.fields.recipientName.fontSize ?? 32}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          recipientName: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Sub Message</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.subMessage ?? getTemplate(selectedTemplate)?.fields.subMessage?.fontSize ?? 14}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          subMessage: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Course Title</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.courseTitle ?? getTemplate(selectedTemplate)?.fields.courseTitle?.fontSize ?? 18}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          courseTitle: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.date && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Date</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.date ?? getTemplate(selectedTemplate)?.fields.date?.fontSize ?? 14}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          date: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.organization && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Organization</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.organization ?? getTemplate(selectedTemplate)?.fields.organization?.fontSize ?? 16}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          organization: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateNumber && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Certificate Number</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.certificateNumber ?? getTemplate(selectedTemplate)?.fields.certificateNumber?.fontSize ?? 10}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          certificateNumber: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-                {selectedTemplate && getTemplate(selectedTemplate)?.fields.signaturePosition && (
-                  <div>
-                    <Label className="text-xs mb-1 block">Signature Position</Label>
-                    <Input
-                      type="number"
-                      value={customFontSizes.signaturePosition ?? getTemplate(selectedTemplate)?.fields.signaturePosition?.fontSize ?? 12}
-                      onChange={(e) => {
-                        setCustomFontSizes((prev) => ({
-                          ...prev,
-                          signaturePosition: Number.parseInt(e.target.value) || undefined,
-                        }))
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Field Mapping */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-lg">Map Fields</h3>
-            </div>
-            <div className="space-y-4">
-              {/* Recipient Name (Required) */}
-              <div>
-                <Label htmlFor="recipient-name" className="mb-2 block">
-                  Recipient Name <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={fieldMapping.recipientName || "none"}
-                  onValueChange={(value) => {
-                    const newMapping = {
-                      ...fieldMapping,
-                      recipientName: value === "none" ? undefined : value,
-                    }
-                    setFieldMapping(newMapping)
-                    setCertificateFieldMapping(newMapping)
-                  }}
-                >
-                  <SelectTrigger id="recipient-name">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {state.headers.map((header) => (
-                      <SelectItem key={header} value={header}>
-                        {header}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Course Title (Optional) */}
-              <div>
-                <Label htmlFor="course-title" className="mb-2 block">
-                  Course/Title (Optional)
-                </Label>
-                <Select
-                  value={fieldMapping.courseTitle || "none"}
-                  onValueChange={(value) => {
-                    const newMapping = {
-                      ...fieldMapping,
-                      courseTitle: value === "none" ? undefined : value,
-                    }
-                    setFieldMapping(newMapping)
-                    setCertificateFieldMapping(newMapping)
-                  }}
-                >
-                  <SelectTrigger id="course-title">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {state.headers.map((header) => (
-                      <SelectItem key={header} value={header}>
-                        {header}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Date (Optional) */}
-              <div>
-                <Label htmlFor="date" className="mb-2 block">
-                  Date (Optional)
-                </Label>
-                <Select
-                  value={fieldMapping.date || "none"}
-                  onValueChange={(value) => {
-                    const newMapping = {
-                      ...fieldMapping,
-                      date: value === "none" ? undefined : value,
-                    }
-                    setFieldMapping(newMapping)
-                    setCertificateFieldMapping(newMapping)
-                  }}
-                >
-                  <SelectTrigger id="date">
-                    <SelectValue placeholder="Select column" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {state.headers.map((header) => (
-                      <SelectItem key={header} value={header}>
-                        {header}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Organization (Optional) */}
-              <div>
-                <Label htmlFor="organization" className="mb-2 block">
-                  Organization/Issuer (Optional)
-                </Label>
-                <Select
-                  value={fieldMapping.organization || "none"}
-                  onValueChange={(value) => {
-                    const newMapping = {
-                      ...fieldMapping,
-                      organization: value === "none" ? undefined : value,
-                    }
-                    setFieldMapping(newMapping)
-                    setCertificateFieldMapping(newMapping)
-                  }}
-                >
-                  <SelectTrigger id="organization">
-                    <SelectValue placeholder="Select column or use default" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Use default below</SelectItem>
-                    {state.headers.map((header) => (
-                      <SelectItem key={header} value={header}>
-                        {header}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Default Organization Name */}
-              <div>
-                <Label htmlFor="org-name" className="mb-2 block">
-                  Default Organization Name
-                </Label>
-                <Input
-                  id="org-name"
-                  value={organizationName}
-                  onChange={(e) => setOrganizationName(e.target.value)}
-                  placeholder="e.g., ABC Academy"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Used if organization column is not mapped or empty
-                </p>
-              </div>
-            </div>
           </div>
 
-          {/* Preview Button */}
-          {previewRow && (
-            <Button 
-              onClick={generatePreview} 
-              variant="outline" 
-              className="w-full" 
-              disabled={!fieldMapping.recipientName || (useCustomTemplate && !customTemplateFile)}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Preview Certificate
-            </Button>
-          )}
-        </div>
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Font Size Controls */}
+            {!useCustomTemplate && (
+              <div className="bg-card border border-border rounded-lg p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Settings className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold text-lg">Font Sizes</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Certificate Title</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.certificateTitle ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.fontSize ?? 36}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            certificateTitle: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Award Message</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.awardMessage ?? getTemplate(selectedTemplate)?.fields.awardMessage?.fontSize ?? 14}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            awardMessage: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Recipient Name</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.recipientName ?? getTemplate(selectedTemplate)?.fields.recipientName.fontSize ?? 32}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            recipientName: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Sub Message</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.subMessage ?? getTemplate(selectedTemplate)?.fields.subMessage?.fontSize ?? 14}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            subMessage: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Course Title</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.courseTitle ?? getTemplate(selectedTemplate)?.fields.courseTitle?.fontSize ?? 18}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            courseTitle: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.date && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Date</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.date ?? getTemplate(selectedTemplate)?.fields.date?.fontSize ?? 14}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            date: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.organization && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Organization</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.organization ?? getTemplate(selectedTemplate)?.fields.organization?.fontSize ?? 16}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            organization: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateNumber && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Certificate Number</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.certificateNumber ?? getTemplate(selectedTemplate)?.fields.certificateNumber?.fontSize ?? 10}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            certificateNumber: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedTemplate && getTemplate(selectedTemplate)?.fields.signaturePosition && (
+                    <div>
+                      <Label className="text-xs mb-1 block">Signature Position</Label>
+                      <Input
+                        type="number"
+                        value={customFontSizes.signaturePosition ?? getTemplate(selectedTemplate)?.fields.signaturePosition?.fontSize ?? 12}
+                        onChange={(e) => {
+                          setCustomFontSizes((prev) => ({
+                            ...prev,
+                            signaturePosition: Number.parseInt(e.target.value) || undefined,
+                          }))
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* Generation Status */}
+            {generating && (
+              <div className="bg-card border border-border rounded-lg p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                  <h3 className="font-semibold">Generating Certificates...</h3>
+                </div>
+                <Progress value={generationProgress} className="mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Generating certificates for {state.rows.filter((_, idx) => !state.skippedRows.has(idx)).length}{" "}
+                  recipients
+                </p>
+              </div>
+            )}
 
-        {/* Right Column: Preview & Actions */}
-        <div className="space-y-6">
-          {/* Certificate Preview */}
-          {showPreview && previewPdf && (
+            {/* Success Message */}
+            {!generating && state.pdfFiles.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-green-500/10 border border-green-500/30 rounded-lg p-6"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <h3 className="font-semibold text-green-700">
+                    {state.pdfFiles.length} Certificate{state.pdfFiles.length > 1 ? "s" : ""} Generated
+                  </h3>
+                </div>
+                <p className="text-sm text-green-600">
+                  Certificates have been generated and matched to recipients. You can continue to compose your email.
+                </p>
+              </motion.div>
+            )}
+
+            {/* Stats */}
             <div className="bg-card border border-border rounded-lg p-6">
-              <h3 className="font-semibold mb-4">Certificate Preview</h3>
-              <div className="border border-border rounded-lg overflow-hidden">
-                <iframe
-                  src={`data:application/pdf;base64,${previewPdf}`}
-                  className="w-full h-[500px]"
-                  title="Certificate Preview"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Preview for: {previewRow?.[fieldMapping.recipientName || ""] || "First recipient"}
-              </p>
-            </div>
-          )}
-
-          {/* Generation Status */}
-          {generating && (
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                <h3 className="font-semibold">Generating Certificates...</h3>
-              </div>
-              <Progress value={generationProgress} className="mb-2" />
-              <p className="text-sm text-muted-foreground">
-                Generating certificates for {state.rows.filter((_, idx) => !state.skippedRows.has(idx)).length}{" "}
-                recipients
-              </p>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {!generating && state.pdfFiles.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-green-500/10 border border-green-500/30 rounded-lg p-6"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h3 className="font-semibold text-green-700">
-                  {state.pdfFiles.length} Certificate{state.pdfFiles.length > 1 ? "s" : ""} Generated
-                </h3>
-              </div>
-              <p className="text-sm text-green-600">
-                Certificates have been generated and matched to recipients. You can continue to compose your email.
-              </p>
-            </motion.div>
-          )}
-
-          {/* Stats */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="font-semibold mb-4">Recipients</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Recipients:</span>
-                <span className="font-semibold">{state.rows.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Active Recipients:</span>
-                <span className="font-semibold text-green-600">
-                  {state.rows.filter((_, idx) => !state.skippedRows.has(idx)).length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Skipped:</span>
-                <span className="font-semibold text-amber-600">{state.skippedRows.size}</span>
+              <h3 className="font-semibold mb-4">Recipients</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Recipients:</span>
+                  <span className="font-semibold">{state.rows.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Active Recipients:</span>
+                  <span className="font-semibold text-green-600">
+                    {state.rows.filter((_, idx) => !state.skippedRows.has(idx)).length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Skipped:</span>
+                  <span className="font-semibold text-amber-600">{state.skippedRows.size}</span>
+                </div>
               </div>
             </div>
           </div>
