@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, type ReactNode } from "react"
+import type { CertificateMode, CertificateFieldMapping, CertificateConfig } from "@/types/certificate"
 
 export interface FileRow {
   [key: string]: string
@@ -36,6 +37,11 @@ export interface SendWizardState {
   sendResults: Array<{ name: string; email: string; status: "sent" | "failed"; message?: string }>
   autoDetectedMapping: boolean
   certificateLinkEnabled: boolean
+  // Certificate generation state
+  certificateMode: CertificateMode
+  certificateTemplate: string | null // template ID
+  certificateFieldMapping: CertificateFieldMapping
+  certificateConfig: CertificateConfig | null
 }
 
 interface SendWizardContextType {
@@ -53,6 +59,11 @@ interface SendWizardContextType {
   removePdfMatch: (rowIndex: number) => void
   setSendResults: (results: Array<{ name: string; email: string; status: "sent" | "failed"; message?: string }>) => void
   setCertificateLinkEnabled: (enabled: boolean) => void
+  // Certificate generation functions
+  setCertificateMode: (mode: CertificateMode) => void
+  setCertificateTemplate: (templateId: string) => void
+  setCertificateFieldMapping: (mapping: CertificateFieldMapping) => void
+  setCertificateConfig: (config: CertificateConfig | null) => void
   reset: () => void
 }
 
@@ -75,6 +86,10 @@ export function SendWizardProvider({ children }: { children: ReactNode }) {
     sendResults: [],
     autoDetectedMapping: false,
     certificateLinkEnabled: false,
+    certificateMode: "upload",
+    certificateTemplate: null,
+    certificateFieldMapping: {},
+    certificateConfig: null,
   }
 
   const [state, setState] = useState<SendWizardState>(initialState)
@@ -163,6 +178,28 @@ export function SendWizardProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, certificateLinkEnabled: enabled }))
   }
 
+  const setCertificateMode = (mode: CertificateMode) => {
+    // Clear PDFs and matches when switching modes
+    setState((prev) => ({
+      ...prev,
+      certificateMode: mode,
+      pdfFiles: [],
+      pdfMatches: new Map(),
+    }))
+  }
+
+  const setCertificateTemplate = (templateId: string) => {
+    setState((prev) => ({ ...prev, certificateTemplate: templateId }))
+  }
+
+  const setCertificateFieldMapping = (mapping: CertificateFieldMapping) => {
+    setState((prev) => ({ ...prev, certificateFieldMapping: mapping }))
+  }
+
+  const setCertificateConfig = (config: CertificateConfig | null) => {
+    setState((prev) => ({ ...prev, certificateConfig: config }))
+  }
+
   const reset = () => {
     setState(initialState)
     // Clear send completion flag when resetting
@@ -189,6 +226,10 @@ export function SendWizardProvider({ children }: { children: ReactNode }) {
         removePdfMatch,
         setSendResults,
         setCertificateLinkEnabled,
+        setCertificateMode,
+        setCertificateTemplate,
+        setCertificateFieldMapping,
+        setCertificateConfig,
         reset,
       }}
     >

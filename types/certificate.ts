@@ -16,11 +16,14 @@ export interface CertificateLayout {
 }
 
 export interface CertificateFields {
-  recipientName: CertificateFieldPosition
+  certificateTitle?: CertificateFieldPosition // e.g., "Certificate of Appreciation" or "Certificate of Completion"
   awardMessage?: CertificateFieldPosition // e.g., "This certificate is awarded to"
+  recipientName: CertificateFieldPosition
+  subMessage?: CertificateFieldPosition // e.g., "for completion of..." or "in recognition of..."
   courseTitle?: CertificateFieldPosition
   date?: CertificateFieldPosition
   organization?: CertificateFieldPosition
+  signaturePosition?: CertificateFieldPosition // Position/title below signature (e.g., "Manager", "President")
   certificateNumber?: CertificateFieldPosition
   customFields?: Array<{
     key: string
