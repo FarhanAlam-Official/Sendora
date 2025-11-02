@@ -2,20 +2,22 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { FileUp, X, CheckCircle, AlertCircle, Settings, Save } from "lucide-react"
+import { FileUp, X, CheckCircle, AlertCircle, Settings, Save, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSendWizard, type PdfFile } from "./send-wizard-context"
+import StepCertificateCreate from "./step-certificate-create"
 
 const MAX_PDF_SIZE_MB = 20
 const MAX_PDF_COUNT = 250
 
 export default function StepPdfUploadMatch() {
-  const { state, setStep, setPdfFiles, setPdfMatch, removePdfMatch, skipRow, unskipRow, setMapping, setCertificateLinkEnabled } = useSendWizard()
+  const { state, setStep, setPdfFiles, setPdfMatch, removePdfMatch, skipRow, unskipRow, setMapping, setCertificateLinkEnabled, setCertificateMode } = useSendWizard()
   const [pdfs, setPdfs] = useState<File[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState("")
@@ -132,8 +134,29 @@ export default function StepPdfUploadMatch() {
     .filter(([idx, v]) => v && v !== "__none__" && !state.skippedRows.has(idx))
     .length
 
+  // If certificate creation mode, render that component instead
+  if (state.certificateMode === "create") {
+    return <StepCertificateCreate />
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto space-y-6">
+      {/* Mode Selector */}
+      <div className="bg-card border border-border rounded-lg p-4">
+        <Tabs value={state.certificateMode} onValueChange={(value) => setCertificateMode(value as "upload" | "create")}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <FileUp className="w-4 h-4" />
+              Upload PDFs
+            </TabsTrigger>
+            <TabsTrigger value="create" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Create Certificates
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold mb-2">Upload & Match PDF Certificates</h2>
