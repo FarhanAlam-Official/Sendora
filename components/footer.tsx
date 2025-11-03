@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Mail, Github, Linkedin, Twitter } from "lucide-react"
+import { Mail, Github, Linkedin, Instagram, Facebook } from "lucide-react"
 
 export default function Footer() {
   const fadeInUp = {
@@ -41,22 +41,25 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               Smart certificate and email distribution made simple.
             </p>
-            <div className="flex gap-4 pt-2">
+            <div className="flex gap-3 pt-2">
               {[
-                { icon: Mail, href: "mailto:contact@sendora.app", label: "Email" },
-                { icon: Github, href: "https://github.com/FarhanAlam-Official", label: "GitHub" },
-                { icon: Linkedin, href: "#", label: "LinkedIn" },
-                { icon: Twitter, href: "#", label: "Twitter" },
+                { icon: Instagram, href: "https://instagram.com/farhan.alam.01", label: "Instagram", color: "hover:text-pink-500" },
+                { icon: Facebook, href: "https://facebook.com/farhanalam930", label: "Facebook", color: "hover:text-blue-500" },
+                { icon: Linkedin, href: "https://linkedin.com/in/farhan-alam-aa56b2309", label: "LinkedIn", color: "hover:text-blue-600" },
+                { icon: Mail, href: "mailto:thefarhanalam01@gmail.com", label: "Email", color: "hover:text-red-500" },
+                { icon: Github, href: "https://github.com/FarhanAlam-Official", label: "GitHub", color: "hover:text-gray-400" },
               ].map((social, i) => (
                 <motion.a
                   key={i}
                   href={social.href}
-                  whileHover={{ scale: 1.2 }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.15, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors"
+                  className={`w-10 h-10 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-all group ${social.color}`}
                   aria-label={social.label}
                 >
-                  <social.icon className="w-5 h-5" />
+                  <social.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </motion.a>
               ))}
             </div>
@@ -176,12 +179,12 @@ export default function Footer() {
             variants={fadeInUp}
             className="text-sm text-muted-foreground text-center md:text-left"
           >
-            Made with ❤️ by{" "}
+            Made with <span className="text-red-500">❤️</span> by{" "}
             <Link
               href="https://github.com/FarhanAlam-Official"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline font-medium"
+              className="font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent hover:from-primary hover:via-accent hover:to-primary transition-all no-underline"
             >
               Farhan Alam
             </Link>
