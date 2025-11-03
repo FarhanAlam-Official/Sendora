@@ -476,14 +476,24 @@ export default function CertificateGeneratorStandalone() {
         const base64Pdf = btoa(binary)
         setPreviewPdf(base64Pdf)
         
-        // Create blob URL for iframe (allows disabling toolbar)
+        // Generate proper filename for preview
+        const recipientName = previewRow[fieldMapping.recipientName || ""]?.toString() || "preview"
+        const sanitizedName = recipientName
+          .replace(/[^a-zA-Z0-9\s]/g, "_")
+          .replace(/\s+/g, "_")
+          .toLowerCase()
+          .slice(0, 50)
+          .replace(/_+$/, "")
+        const filename = `${sanitizedName}_certificate_preview.pdf`
+        
+        // Create File URL for iframe (File has name property for better download support)
         const binaryString1 = atob(base64Pdf)
         const bytes1 = new Uint8Array(binaryString1.length)
         for (let i = 0; i < binaryString1.length; i++) {
           bytes1[i] = binaryString1.charCodeAt(i)
         }
-        const blob1 = new Blob([bytes1], { type: "application/pdf" })
-        const blobUrl1 = URL.createObjectURL(blob1)
+        const file1 = new File([bytes1], filename, { type: "application/pdf" })
+        const blobUrl1 = URL.createObjectURL(file1)
         setPreviewPdfUrl(blobUrl1)
         
         setShowPreview(true)
@@ -545,14 +555,24 @@ export default function CertificateGeneratorStandalone() {
         const base64Pdf = btoa(binary)
         setPreviewPdf(base64Pdf)
         
-        // Create blob URL for iframe (allows disabling toolbar)
+        // Generate proper filename for preview
+        const recipientName = previewRow[fieldMapping.recipientName || ""]?.toString() || "preview"
+        const sanitizedName = recipientName
+          .replace(/[^a-zA-Z0-9\s]/g, "_")
+          .replace(/\s+/g, "_")
+          .toLowerCase()
+          .slice(0, 50)
+          .replace(/_+$/, "")
+        const filename = `${sanitizedName}_certificate_preview.pdf`
+        
+        // Create File URL for iframe (File has name property for better download support)
         const binaryString2 = atob(base64Pdf)
         const bytes3 = new Uint8Array(binaryString2.length)
         for (let i = 0; i < binaryString2.length; i++) {
           bytes3[i] = binaryString2.charCodeAt(i)
         }
-        const blob2 = new Blob([bytes3], { type: "application/pdf" })
-        const blobUrl2 = URL.createObjectURL(blob2)
+        const file2 = new File([bytes3], filename, { type: "application/pdf" })
+        const blobUrl2 = URL.createObjectURL(file2)
         setPreviewPdfUrl(blobUrl2)
         
         setShowPreview(true)
@@ -1491,7 +1511,7 @@ export default function CertificateGeneratorStandalone() {
 
           {/* Field Mapping Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column - Field Mapping & Award Message */}
+            {/* Left Column - Field Mapping */}
             <div className="space-y-6">
               {/* Field Mapping */}
               <div className="bg-card border border-border rounded-lg p-6">
@@ -1616,15 +1636,155 @@ export default function CertificateGeneratorStandalone() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Award Message & Branding */}
+            {/* Right Column - Font Sizes */}
+            <div className="space-y-6">
+              {/* Font Size Controls */}
               {!useCustomTemplate && (
-                <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <div className="bg-card border border-border rounded-lg p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Award Message & Branding</h3>
+                    <Settings className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Font Sizes</h3>
                   </div>
-                
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Certificate Title</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.certificateTitle ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.fontSize ?? 36}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              certificateTitle: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Award Message</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.awardMessage ?? getTemplate(selectedTemplate)?.fields.awardMessage?.fontSize ?? 14}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              awardMessage: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Recipient Name</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.recipientName ?? getTemplate(selectedTemplate)?.fields.recipientName.fontSize ?? 32}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              recipientName: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Sub Message</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.subMessage ?? getTemplate(selectedTemplate)?.fields.subMessage?.fontSize ?? 14}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              subMessage: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Course Title</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.courseTitle ?? getTemplate(selectedTemplate)?.fields.courseTitle?.fontSize ?? 18}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              courseTitle: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.date && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Date</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.date ?? getTemplate(selectedTemplate)?.fields.date?.fontSize ?? 14}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              date: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.organization && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Organization</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.organization ?? getTemplate(selectedTemplate)?.fields.organization?.fontSize ?? 16}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              organization: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.signaturePosition && (
+                      <div>
+                        <Label className="text-xs mb-1 block">Signature Position</Label>
+                        <Input
+                          type="number"
+                          value={customFontSizes.signaturePosition ?? getTemplate(selectedTemplate)?.fields.signaturePosition?.fontSize ?? 12}
+                          onChange={(e) => {
+                            setCustomFontSizes((prev) => ({
+                              ...prev,
+                              signaturePosition: Number.parseInt(e.target.value) || undefined,
+                            }))
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Award Message & Branding - Full Width */}
+          {!useCustomTemplate && (
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <FileText className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold text-lg">Award Message & Branding</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column - Text Fields */}
+                <div className="space-y-4">
                   <div>
                     <Label htmlFor="certificate-title" className="mb-2 block">Certificate Title</Label>
                     <Select
@@ -1764,12 +1924,15 @@ export default function CertificateGeneratorStandalone() {
                       Position/title shown below signature (e.g., "Manager", "President")
                     </p>
                   </div>
+                </div>
 
+                {/* Right Column - Logo & Signature Uploads */}
+                <div className="space-y-4">
                   {/* Logo Upload */}
                   <div>
                     <Label className="mb-2 block">Logo (Optional)</Label>
                     {!logoPreview ? (
-                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-indigo-500 transition-colors cursor-pointer group">
                         <input
                           type="file"
                           accept=".png,.jpg,.jpeg"
@@ -1782,8 +1945,8 @@ export default function CertificateGeneratorStandalone() {
                           id="logo-upload"
                         />
                         <label htmlFor="logo-upload" className="cursor-pointer">
-                          <FileUp className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">Click to upload logo</p>
+                          <FileUp className="w-8 h-8 text-muted-foreground group-hover:text-indigo-500 mx-auto mb-2 transition-colors" />
+                          <p className="text-sm text-muted-foreground group-hover:text-indigo-500 transition-colors">Click to upload logo</p>
                           <p className="text-xs text-muted-foreground">PNG or JPG (max 2MB)</p>
                         </label>
                       </div>
@@ -1809,7 +1972,7 @@ export default function CertificateGeneratorStandalone() {
                   <div>
                     <Label className="mb-2 block">Signature (Optional)</Label>
                     {!signaturePreview ? (
-                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-indigo-500 transition-colors cursor-pointer group">
                         <input
                           type="file"
                           accept=".png,.jpg,.jpeg"
@@ -1822,8 +1985,8 @@ export default function CertificateGeneratorStandalone() {
                           id="signature-upload"
                         />
                         <label htmlFor="signature-upload" className="cursor-pointer">
-                          <FileUp className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">Click to upload signature</p>
+                          <FileUp className="w-8 h-8 text-muted-foreground group-hover:text-indigo-500 mx-auto mb-2 transition-colors" />
+                          <p className="text-sm text-muted-foreground group-hover:text-indigo-500 transition-colors">Click to upload signature</p>
                           <p className="text-xs text-muted-foreground">PNG or JPG (max 2MB)</p>
                         </label>
                       </div>
@@ -1845,144 +2008,9 @@ export default function CertificateGeneratorStandalone() {
                     )}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-
-            {/* Right Column - Font Sizes */}
-            <div className="space-y-6">
-              {/* Font Size Controls */}
-              {!useCustomTemplate && (
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Settings className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Font Sizes</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Certificate Title</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.certificateTitle ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.fontSize ?? 36}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              certificateTitle: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Award Message</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.awardMessage ?? getTemplate(selectedTemplate)?.fields.awardMessage?.fontSize ?? 14}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              awardMessage: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Recipient Name</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.recipientName ?? getTemplate(selectedTemplate)?.fields.recipientName.fontSize ?? 32}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              recipientName: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Sub Message</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.subMessage ?? getTemplate(selectedTemplate)?.fields.subMessage?.fontSize ?? 14}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              subMessage: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Course Title</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.courseTitle ?? getTemplate(selectedTemplate)?.fields.courseTitle?.fontSize ?? 18}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              courseTitle: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.date && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Date</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.date ?? getTemplate(selectedTemplate)?.fields.date?.fontSize ?? 14}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              date: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.organization && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Organization</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.organization ?? getTemplate(selectedTemplate)?.fields.organization?.fontSize ?? 16}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              organization: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.signaturePosition && (
-                      <div>
-                        <Label className="text-xs mb-1 block">Signature Position</Label>
-                        <Input
-                          type="number"
-                          value={customFontSizes.signaturePosition ?? getTemplate(selectedTemplate)?.fields.signaturePosition?.fontSize ?? 12}
-                          onChange={(e) => {
-                            setCustomFontSizes((prev) => ({
-                              ...prev,
-                              signaturePosition: Number.parseInt(e.target.value) || undefined,
-                            }))
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
 
           {/* Preview Section */}
           <div className="bg-card border border-border rounded-lg p-6">
