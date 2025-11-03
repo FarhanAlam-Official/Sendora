@@ -4,10 +4,12 @@ import type React from "react"
 
 import { useState, useRef } from "react"
 import Link from "next/link"
-import { Upload, File, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Upload, File, AlertCircle, CheckCircle2, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { useSendWizard } from "./send-wizard-context"
 import * as XLSX from "xlsx"
+import { notifications } from "@/lib/notifications"
 
 // Auto-detect column names for name and email
 function autoDetectColumns(headers: string[]): { name?: string; email?: string } {
@@ -44,7 +46,12 @@ export default function StepUpload() {
   const parseFile = (file: File) => {
     try {
       if (!file.name.match(/\.(xlsx|csv|xls)$/)) {
-        setError("Please upload a valid Excel or CSV file")
+        const errorMsg = "Please upload a valid Excel or CSV file"
+        setError(errorMsg)
+        notifications.showError({
+          title: 'Invalid file type',
+          description: errorMsg,
+        })
         return
       }
 
@@ -65,13 +72,39 @@ export default function StepUpload() {
         const jsonData = XLSX.utils.sheet_to_json(worksheet) as FileRow[]
 
         if (jsonData.length === 0) {
-          setError("File appears to be empty")
+          const errorMsg = "File appears to be empty"
+          setError(errorMsg)
+          notifications.showError({
+            title: 'Empty file',
+            description: errorMsg,
+          })
           return
         }
 
         const headers = Object.keys(jsonData[0])
-        if (!headers.some((h) => h.toLowerCase().includes("email"))) {
-          setError("File must contain an email column")
+        const hasEmail = headers.some((h) => h.toLowerCase().includes("email"))
+        const hasName = headers.some((h) => {
+          const lowerH = h.toLowerCase().trim()
+          return lowerH === "name" || lowerH === "full name" || lowerH === "fullname" || (lowerH.includes("name") && !lowerH.includes("email"))
+        })
+        
+        if (!hasEmail) {
+          const errorMsg = "File must contain an Email column (mandatory)"
+          setError(errorMsg)
+          notifications.showError({
+            title: 'Missing email column',
+            description: errorMsg,
+          })
+          return
+        }
+        
+        if (!hasName) {
+          const errorMsg = "File must contain a Name column (mandatory for PDF matching)"
+          setError(errorMsg)
+          notifications.showError({
+            title: 'Missing name column',
+            description: errorMsg,
+          })
           return
         }
 
@@ -84,11 +117,20 @@ export default function StepUpload() {
         
         setFile(file, headers, jsonData)
         setError("")
+        notifications.showSuccess({
+          title: 'File uploaded successfully!',
+          description: `Loaded ${jsonData.length} recipients from ${file.name}`,
+        })
       }
 
       reader.readAsArrayBuffer(file)
     } catch (err) {
-      setError("Failed to parse file. Please check the format.")
+      const errorMsg = "Failed to parse file. Please check the format."
+      setError(errorMsg)
+      notifications.showError({
+        title: 'File parsing error',
+        description: errorMsg,
+      })
       console.error(err)
     }
   }
@@ -126,26 +168,134 @@ export default function StepUpload() {
         <p className="text-muted-foreground">Upload an Excel or CSV file with recipient information</p>
       </div>
 
+      {/* File Upload Component - Prominent */}
       {!state.file && (
-        <div
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-12 text-center transition-all cursor-pointer ${
-            dragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-          }`}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <div className="flex justify-center mb-4">
-            <Upload className="w-12 h-12 text-muted-foreground" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-8 shadow-2xl">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+          
+          <div className="relative">
+            <div
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              className={`relative border-3 border-dashed rounded-xl p-16 text-center transition-all cursor-pointer group ${
+                dragActive 
+                  ? "border-primary bg-primary/20 scale-[1.02] shadow-xl" 
+                  : "border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 hover:scale-[1.01] hover:shadow-lg"
+              }`}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className="flex flex-col items-center justify-center gap-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+                  <Upload className="w-16 h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    Drag and drop your file here
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Or click to browse
+                  </p>
+                  <div className="flex items-center justify-center gap-2 pt-2">
+                    <Badge variant="outline" className="font-semibold">XLSX</Badge>
+                    <Badge variant="outline" className="font-semibold">CSV</Badge>
+                  </div>
+                </div>
+              </div>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                accept=".xlsx,.csv,.xls" 
+                onChange={handleFileSelect} 
+                className="hidden" 
+              />
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-foreground">Drag and drop your file here</p>
-            <p className="text-sm text-muted-foreground mt-1">Or click to browse (XLSX, CSV)</p>
-          </div>
-          <input ref={fileInputRef} type="file" accept=".xlsx,.csv,.xls" onChange={handleFileSelect} className="hidden" />
         </div>
+      )}
+
+      {/* Format Guide - Below Upload, Less Prominent */}
+      {!state.file && (
+        <details className="relative overflow-hidden bg-gradient-to-br from-blue-50/30 via-purple-50/15 to-pink-50/30 dark:from-blue-950/10 dark:via-purple-950/5 dark:to-pink-950/10 border border-blue-200/30 dark:border-blue-800/20 rounded-xl shadow-md">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-400/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+          
+          <summary className="relative cursor-pointer p-4 flex items-center gap-3 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-colors">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+              <Info className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="font-semibold text-sm text-foreground">
+              📋 View Expected File Format (Optional)
+            </h3>
+          </summary>
+          
+          <div className="relative p-5 pt-0 border-t border-border/50">
+            <div className="mb-4">
+              <p className="text-xs text-muted-foreground mb-3">
+                Your CSV/XLSX file should contain the following columns:
+              </p>
+                
+              <div className="overflow-x-auto rounded-lg border border-border/50 bg-background/80 backdrop-blur-sm shadow-inner">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-muted/60 to-muted/40 border-b border-border">
+                      <th className="text-left py-2 px-3 font-semibold text-foreground">Column Name</th>
+                      <th className="text-left py-2 px-3 font-semibold text-foreground">Status</th>
+                      <th className="text-left py-2 px-3 font-semibold text-foreground">Description</th>
+                      <th className="text-left py-2 px-3 font-semibold text-foreground">Example</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    <tr className="hover:bg-muted/20 transition-colors">
+                      <td className="py-2 px-3 font-mono font-medium text-foreground">Email</td>
+                      <td className="py-2 px-3">
+                        <Badge variant="destructive" className="text-[10px] font-semibold px-1.5 py-0.5">Mandatory</Badge>
+                      </td>
+                      <td className="py-2 px-3 text-xs text-muted-foreground">Recipient email address</td>
+                      <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">john@example.com</td>
+                    </tr>
+                    <tr className="hover:bg-muted/20 transition-colors">
+                      <td className="py-2 px-3 font-mono font-medium text-foreground">Name</td>
+                      <td className="py-2 px-3">
+                        <Badge variant="destructive" className="text-[10px] font-semibold px-1.5 py-0.5">Mandatory</Badge>
+                      </td>
+                      <td className="py-2 px-3 text-xs text-muted-foreground">Recipient name (for PDF matching)</td>
+                      <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">John Doe</td>
+                    </tr>
+                    <tr className="hover:bg-muted/20 transition-colors">
+                      <td className="py-2 px-3 font-mono font-medium text-foreground">Certificate Link</td>
+                      <td className="py-2 px-3">
+                        <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                      </td>
+                      <td className="py-2 px-3 text-xs text-muted-foreground">PDF link (use {"{{certificate_link}}"})</td>
+                      <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block break-all">https://...</td>
+                    </tr>
+                    <tr className="hover:bg-muted/20 transition-colors">
+                      <td className="py-2 px-3 font-mono font-medium text-foreground">Custom Message</td>
+                      <td className="py-2 px-3">
+                        <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                      </td>
+                      <td className="py-2 px-3 text-xs text-muted-foreground">Custom message per recipient</td>
+                      <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">Congratulations!</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="mt-3 p-2 rounded bg-blue-50/30 dark:bg-blue-950/15 border border-blue-200/30 dark:border-blue-800/20">
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  <strong className="text-foreground">💡</strong> Column names are auto-detected. 
+                  <strong className="text-foreground"> Email</strong> and <strong className="text-foreground">Name</strong> are required.
+                </p>
+              </div>
+            </div>
+          </div>
+        </details>
       )}
 
       {error && (
@@ -237,7 +387,7 @@ export default function StepUpload() {
         </Link>
         <Button
           onClick={() => setStep(2)}
-          disabled={state.rows.length === 0 || !detectedMapping.email}
+          disabled={state.rows.length === 0 || !detectedMapping.email || !detectedMapping.name}
           className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
         >
           Continue to PDF Upload

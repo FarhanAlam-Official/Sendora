@@ -47,6 +47,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Checkbox } from "@/components/ui/checkbox"
 import type { PdfFile, FileRow } from "./send-wizard-context"
 import type { CertificateStyles } from "@/types/certificate"
+import { notifications } from "@/lib/notifications"
 
 export default function StepCertificateCreate() {
   const {
@@ -412,18 +413,30 @@ export default function StepCertificateCreate() {
   const handleGenerateAll = async () => {
     const validation = validateFieldMapping(fieldMapping)
     if (!validation.valid) {
-      setError(validation.errors.join(", "))
+      const errorMsg = validation.errors.join(", ")
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Validation error',
+        description: errorMsg,
+      })
       return
     }
 
     const activeRows = state.rows.filter((_, idx) => !state.skippedRows.has(idx))
     if (activeRows.length === 0) {
-      setError("No active recipients to generate certificates for")
+      const errorMsg = "No active recipients to generate certificates for"
+      setError(errorMsg)
+      notifications.showWarning(errorMsg)
       return
     }
 
     if (useCustomTemplate && !customTemplateFile) {
-      setError("Please upload a custom template image")
+      const errorMsg = "Please upload a custom template image"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Missing template',
+        description: errorMsg,
+      })
       return
     }
 
@@ -565,10 +578,25 @@ export default function StepCertificateCreate() {
 
       setGenerationProgress(100)
       setError("")
+      
+      // Show success notification
+      const generatedCount = pdfFiles.length
+      notifications.showSuccess({
+        title: 'Certificates generated successfully!',
+        description: `Generated ${generatedCount} certificate${generatedCount > 1 ? 's' : ''} for your recipients.`,
+      }, {
+        duration: 5000,
+      })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to generate certificates"
       setError(errorMessage)
       console.error("Certificate generation error:", err)
+      notifications.showError({
+        title: 'Certificate generation failed',
+        description: errorMessage,
+      }, {
+        duration: 5000,
+      })
     } finally {
       setGenerating(false)
     }

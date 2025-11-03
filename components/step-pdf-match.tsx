@@ -6,35 +6,61 @@ import { CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSendWizard } from "./send-wizard-context"
+import { findBestMatchingPDFWithConfidence } from "@/lib/pdf-utils"
+import { ConfidenceBadge } from "./confidence-badge"
 
 export default function StepPdfMatch() {
   const { state, setStep, setPdfMatch, removePdfMatch } = useSendWizard()
   const [matches, setMatches] = useState<Record<number, string>>({})
   const [autoMatched, setAutoMatched] = useState(0)
+  const [matchConfidences, setMatchConfidences] = useState<Map<number, { confidence: number; needsReview: boolean; matchType: string }>>(new Map())
 
   useEffect(() => {
-    // Auto-match based on filename
+    // Auto-match based on filename using Phase 3 matching
     if (state.rows.length > 0 && state.pdfFiles.length > 0 && state.mapping.name) {
       const newMatches: Record<number, string> = {}
+      const newConfidences = new Map<number, { confidence: number; needsReview: boolean; matchType: string }>()
       let matched = 0
+
+      // Convert PdfFile[] to File[] for matching
+      const pdfFiles: File[] = state.pdfFiles.map((pdfFile) => {
+        const byteCharacters = atob(pdfFile.blob)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        return new File([byteArray], pdfFile.name, { type: "application/pdf" })
+      })
 
       state.rows.forEach((row, idx) => {
         if (state.skippedRows.has(idx)) return
 
-        const rowName = row[state.mapping.name || ""]?.toLowerCase().replace(/\s+/g, "") || ""
-        const matchedPdf = state.pdfFiles.find((pdf) => {
-          const pdfName = pdf.name.toLowerCase().replace(/\.pdf/i, "").replace(/\s+/g, "")
-          return pdfName.includes(rowName) || rowName.includes(pdfName)
-        })
+        const recipientName = row[state.mapping.name || ""]
+        
+        if (!recipientName) return
 
-        if (matchedPdf) {
-          newMatches[idx] = matchedPdf.name
-          setPdfMatch(idx, matchedPdf.name)
-          matched++
+        // Use improved matching with confidence scoring (Phase 3)
+        const matchResult = findBestMatchingPDFWithConfidence(recipientName, pdfFiles)
+
+        if (matchResult) {
+          // Find the corresponding PdfFile by name
+          const matchedPdf = state.pdfFiles.find((pf) => pf.name === matchResult.file.name)
+          if (matchedPdf) {
+            newMatches[idx] = matchedPdf.name
+            setPdfMatch(idx, matchedPdf.name)
+            newConfidences.set(idx, {
+              confidence: matchResult.confidence,
+              needsReview: matchResult.needsReview,
+              matchType: matchResult.matchType,
+            })
+            matched++
+          }
         }
       })
 
       setMatches(newMatches)
+      setMatchConfidences(newConfidences)
       setAutoMatched(matched)
     }
   }, [])
@@ -71,10 +97,20 @@ export default function StepPdfMatch() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2"
+          className="space-y-2"
         >
-          <CheckCircle className="w-5 h-5 text-green-600" />
-          <span className="text-green-600 text-sm">Auto-matched {autoMatched} recipients</span>
+          <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="text-green-600 text-sm">Auto-matched {autoMatched} recipients</span>
+          </div>
+          {Array.from(matchConfidences.values()).some((c) => c.needsReview) && (
+            <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <span className="text-yellow-600 text-sm">
+                {Array.from(matchConfidences.values()).filter((c) => c.needsReview).length} match(es) need review (low confidence)
+              </span>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -120,7 +156,18 @@ export default function StepPdfMatch() {
                   ))}
                 </SelectContent>
               </Select>
-              {currentMatch && currentMatch !== "__none__" && <CheckCircle className="w-5 h-5 text-green-600" />}
+              {currentMatch && currentMatch !== "__none__" && (
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  {matchConfidences.has(idx) && (
+                    <ConfidenceBadge
+                      confidence={matchConfidences.get(idx)!.confidence}
+                      needsReview={matchConfidences.get(idx)!.needsReview}
+                      matchType={matchConfidences.get(idx)!.matchType as any}
+                    />
+                  )}
+                </div>
+              )}
             </motion.div>
           )
         })}

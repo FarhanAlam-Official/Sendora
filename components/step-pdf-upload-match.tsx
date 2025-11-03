@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { FileUp, X, CheckCircle, AlertCircle, Settings, Save, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSendWizard, type PdfFile } from "./send-wizard-context"
 import StepCertificateCreate from "./step-certificate-create"
+import { findBestMatchingPDFWithConfidence } from "@/lib/pdf-utils"
+import { ConfidenceBadge } from "./confidence-badge"
 
 const MAX_PDF_SIZE_MB = 20
 const MAX_PDF_COUNT = 250
@@ -23,29 +25,37 @@ export default function StepPdfUploadMatch() {
   const [error, setError] = useState("")
   const [autoMatched, setAutoMatched] = useState(0)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [matchConfidences, setMatchConfidences] = useState<Map<number, { confidence: number; needsReview: boolean; matchType: string }>>(new Map())
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-match PDFs when they're uploaded
+  // Auto-match PDFs when they're uploaded using Phase 3 matching
   useEffect(() => {
     if (pdfs.length > 0 && state.rows.length > 0 && state.mapping.name) {
       let matched = 0
+      const newConfidences = new Map<number, { confidence: number; needsReview: boolean; matchType: string }>()
       
       state.rows.forEach((row, idx) => {
         if (state.skippedRows.has(idx)) return
 
-        const rowName = row[state.mapping.name || ""]?.toLowerCase().replace(/\s+/g, "") || ""
+        const recipientName = row[state.mapping.name || ""]
         
-        // Find matching PDF
-        for (const pdf of pdfs) {
-          const pdfName = pdf.name.toLowerCase().replace(/\.pdf/i, "").replace(/\s+/g, "")
-          
-          if (rowName === pdfName || pdfName.includes(rowName) || rowName.includes(pdfName)) {
-            setPdfMatch(idx, pdf.name)
-            matched++
-            break
-          }
+        if (!recipientName) return
+
+        // Use improved matching with confidence scoring (Phase 3)
+        const matchResult = findBestMatchingPDFWithConfidence(recipientName, pdfs)
+        
+        if (matchResult) {
+          setPdfMatch(idx, matchResult.file.name)
+          newConfidences.set(idx, {
+            confidence: matchResult.confidence,
+            needsReview: matchResult.needsReview,
+            matchType: matchResult.matchType,
+          })
+          matched++
         }
       })
       
+      setMatchConfidences(newConfidences)
       setAutoMatched(matched)
     }
   }, [pdfs, state.rows.length, state.mapping.name])
@@ -276,11 +286,13 @@ export default function StepPdfUploadMatch() {
             setIsDragging(false)
             handleFiles(e.dataTransfer.files)
           }}
-          className={`border-2 border-dashed rounded-lg p-8 transition-all ${
-            isDragging ? "border-primary bg-primary/5" : "border-border"
+          onClick={() => fileInputRef.current?.click()}
+          className={`border-2 border-dashed rounded-lg p-8 transition-all cursor-pointer ${
+            isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
           }`}
         >
           <input
+            ref={fileInputRef}
             type="file"
             multiple
             accept=".pdf"
@@ -288,7 +300,7 @@ export default function StepPdfUploadMatch() {
             className="hidden"
             id="pdf-input"
           />
-          <label htmlFor="pdf-input" className="cursor-pointer">
+          <label htmlFor="pdf-input" className="cursor-pointer block">
             Drag and drop PDFs or click to browse
           </label>
         </div>
@@ -332,10 +344,20 @@ export default function StepPdfUploadMatch() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2"
+          className="space-y-2"
         >
-          <CheckCircle className="w-5 h-5 text-green-600" />
-          <span className="text-green-600 text-sm">Auto-matched {autoMatched} recipients with PDFs</span>
+          <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="text-green-600 text-sm">Auto-matched {autoMatched} recipients with PDFs</span>
+          </div>
+          {Array.from(matchConfidences.values()).some((c) => c.needsReview) && (
+            <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <span className="text-yellow-600 text-sm">
+                {Array.from(matchConfidences.values()).filter((c) => c.needsReview).length} match(es) need review (low confidence)
+              </span>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -402,7 +424,16 @@ export default function StepPdfUploadMatch() {
                   </SelectContent>
                 </Select>
                 {currentMatch && currentMatch !== "__none__" && !isSkipped && (
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    {matchConfidences.has(idx) && (
+                      <ConfidenceBadge
+                        confidence={matchConfidences.get(idx)!.confidence}
+                        needsReview={matchConfidences.get(idx)!.needsReview}
+                        matchType={matchConfidences.get(idx)!.matchType as any}
+                      />
+                    )}
+                  </div>
                 )}
               </motion.div>
             )
