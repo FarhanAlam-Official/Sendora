@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { notifications } from "@/lib/notifications"
 
 export default function SMTPConfigPage() {
   const [smtp, setSMTP] = useState({
@@ -26,7 +27,10 @@ export default function SMTPConfigPage() {
 
   const handleSave = () => {
     localStorage.setItem("sendora_smtp_custom", JSON.stringify(smtp))
-    alert("SMTP configuration saved!")
+    notifications.showSuccess({
+      title: 'SMTP configuration saved!',
+      description: 'Your custom SMTP settings have been saved successfully.',
+    })
   }
 
   const handleTest = async () => {
@@ -48,11 +52,25 @@ export default function SMTPConfigPage() {
       const data = await response.json()
       if (response.ok) {
         setTestResult({ success: true, message: "Connection successful!" })
+        notifications.showSuccess({
+          title: 'SMTP connection successful!',
+          description: 'Your SMTP settings are working correctly.',
+        })
       } else {
-        setTestResult({ success: false, message: data.error || "Connection failed" })
+        const errorMessage = data.error || "Connection failed"
+        setTestResult({ success: false, message: errorMessage })
+        notifications.showError({
+          title: 'SMTP connection failed',
+          description: errorMessage,
+        })
       }
     } catch (error) {
-      setTestResult({ success: false, message: "Failed to test connection" })
+      const errorMessage = "Failed to test connection"
+      setTestResult({ success: false, message: errorMessage })
+      notifications.showError({
+        title: 'Connection test failed',
+        description: 'Unable to connect to the SMTP server. Please check your settings.',
+      })
     } finally {
       setTesting(false)
     }
