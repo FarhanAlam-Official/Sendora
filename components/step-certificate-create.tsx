@@ -44,6 +44,8 @@ import {
   PenTool,
 } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Checkbox } from "@/components/ui/checkbox"
+import type { PdfFile, FileRow } from "./send-wizard-context"
 import type { CertificateStyles } from "@/types/certificate"
 
 export default function StepCertificateCreate() {
@@ -52,6 +54,7 @@ export default function StepCertificateCreate() {
     setStep,
     setPdfFiles,
     setPdfMatch,
+    removePdfMatch,
     setCertificateTemplate,
     setCertificateFieldMapping,
     setCertificateConfig,
@@ -1742,6 +1745,165 @@ export default function StepCertificateCreate() {
           </div>
         </div>
       </div>
+
+      {/* Certificate Matching Preview */}
+      {state.pdfFiles.length > 0 && state.rows.length > 0 && (
+        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold text-lg mb-1">Certificate Matching Preview</h3>
+              <p className="text-sm text-muted-foreground">
+                Review and adjust certificate assignments. You can skip recipients or manually change matches.
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {state.rows.slice(0, 50).map((row, idx) => {
+              const nameField = state.mapping.name || fieldMapping.recipientName || ""
+              const emailField = state.mapping.email || ""
+              const currentMatch = state.pdfMatches.get(idx) || "__none__"
+              const isSkipped = state.skippedRows.has(idx)
+              const hasNoCert = currentMatch === "__none__"
+
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.02 }}
+                  className={`flex items-center gap-4 p-4 rounded-lg border ${
+                    isSkipped ? "bg-red-50/50 border-red-200 opacity-60" : "bg-muted/50 border-border"
+                  }`}
+                >
+                  <div className="flex-shrink-0 flex items-center justify-center">
+                    <Checkbox
+                      id={`skip-cert-${idx}`}
+                      checked={isSkipped}
+                      onCheckedChange={(checked) => {
+                        const shouldSkip = checked === true
+                        if (shouldSkip) {
+                          skipRow(idx)
+                          // Remove certificate match when skipping
+                          removePdfMatch(idx)
+                        } else {
+                          unskipRow(idx)
+                        }
+                      }}
+                      className="w-6 h-6 border-2 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold truncate ${isSkipped ? "line-through text-muted-foreground" : ""}`}>
+                      {row[nameField] || "Unknown"}
+                    </p>
+                    <p className="text-sm text-muted-foreground truncate">{row[emailField] || "No email"}</p>
+                    {hasNoCert && !isSkipped && (
+                      <p className="text-xs text-amber-600 mt-1">⚠️ No certificate matched</p>
+                    )}
+                    {isSkipped && (
+                      <p className="text-xs text-red-600 mt-1">⏭️ Skipped - will not receive email</p>
+                    )}
+                  </div>
+                  <Select
+                    value={currentMatch}
+                    onValueChange={(value) => {
+                      if (value && value !== "__none__") {
+                        setPdfMatch(idx, value)
+                        // Unskip if they match a certificate
+                        unskipRow(idx)
+                      } else {
+                        removePdfMatch(idx)
+                      }
+                    }}
+                    disabled={isSkipped}
+                  >
+                    <SelectTrigger className="w-64" disabled={isSkipped}>
+                      <SelectValue placeholder="Select certificate..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">No Certificate</SelectItem>
+                      {state.pdfFiles.map((pdf) => (
+                        <SelectItem key={pdf.name} value={pdf.name}>
+                          {pdf.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {currentMatch && currentMatch !== "__none__" && !isSkipped && (
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  )}
+                </motion.div>
+              )
+            })}
+            {state.rows.length > 50 && (
+              <p className="text-xs text-muted-foreground text-center">
+                ... and {state.rows.length - 50} more recipients
+              </p>
+            )}
+          </div>
+
+          {/* Stats and Warnings */}
+          {(() => {
+            const activeRows = state.rows.filter((_, idx) => !state.skippedRows.has(idx))
+            const matchedCount = Array.from(state.pdfMatches.entries()).filter(
+              ([idx, v]) => v && v !== "__none__" && !state.skippedRows.has(idx)
+            ).length
+            const unmatchedCount = activeRows.length - matchedCount
+
+            return (
+              <>
+                {unmatchedCount > 0 && state.pdfFiles.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertCircle className="w-5 h-5 text-yellow-600" />
+                      <span className="text-yellow-600 text-sm font-medium">
+                        {unmatchedCount} recipient{unmatchedCount > 1 ? "s" : ""} without certificate match
+                      </span>
+                    </div>
+                    <p className="text-xs text-yellow-700 ml-7">
+                      You can manually match a certificate or skip these recipients by checking the box. Skipped recipients will not
+                      receive an email.
+                    </p>
+                  </motion.div>
+                )}
+
+                {state.skippedRows.size > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-center gap-2"
+                  >
+                    <AlertCircle className="w-5 h-5 text-blue-600" />
+                    <span className="text-blue-600 text-sm">
+                      {state.skippedRows.size} recipient{state.skippedRows.size > 1 ? "s" : ""} will be skipped (no email sent)
+                    </span>
+                  </motion.div>
+                )}
+
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary">{matchedCount}</p>
+                    <p className="text-xs text-muted-foreground">Matched</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-amber-600">{unmatchedCount}</p>
+                    <p className="text-xs text-muted-foreground">Unmatched</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-red-600">{state.skippedRows.size}</p>
+                    <p className="text-xs text-muted-foreground">Skipped</p>
+                  </div>
+                </div>
+              </>
+            )
+          })()}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex justify-between">
