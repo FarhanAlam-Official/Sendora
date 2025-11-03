@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { CERTIFICATE_TEMPLATES, getTemplate } from "./certificate-templates"
 import {
   generateCertificate,
@@ -43,9 +44,11 @@ import {
   Download,
   ImageIcon,
   PenTool,
+  Info,
 } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import * as XLSX from "xlsx"
+import { notifications } from "@/lib/notifications"
 
 interface FileRow {
   [key: string]: string
@@ -113,7 +116,12 @@ export default function CertificateGeneratorStandalone() {
   const handleFileUpload = (uploadedFile: File) => {
     try {
       if (!uploadedFile.name.match(/\.(xlsx|csv|xls)$/)) {
-        setError("Please upload a valid Excel or CSV file")
+        const errorMsg = "Please upload a valid Excel or CSV file"
+        setError(errorMsg)
+        notifications.showError({
+          title: 'Invalid file type',
+          description: errorMsg,
+        })
         return
       }
 
@@ -135,13 +143,23 @@ export default function CertificateGeneratorStandalone() {
           const jsonData = XLSX.utils.sheet_to_json(worksheet) as FileRow[]
 
           if (jsonData.length === 0) {
-            setError("File appears to be empty")
+            const errorMsg = "File appears to be empty"
+            setError(errorMsg)
+            notifications.showError({
+              title: 'Empty file',
+              description: errorMsg,
+            })
             return
           }
 
           const headersRow = Object.keys(jsonData[0])
           if (headersRow.length === 0) {
-            setError("Could not detect headers. Please ensure your Excel file has a header row.")
+            const errorMsg = "Could not detect headers. Please ensure your Excel file has a header row."
+            setError(errorMsg)
+            notifications.showError({
+              title: 'Invalid file format',
+              description: errorMsg,
+            })
             return
           }
 
@@ -149,6 +167,11 @@ export default function CertificateGeneratorStandalone() {
           setRows(jsonData)
           setFile(uploadedFile)
           setSkippedRows(new Set()) // Reset skipped rows when new file is uploaded
+          
+          notifications.showSuccess({
+            title: 'File uploaded successfully!',
+            description: `Loaded ${jsonData.length} recipients from ${uploadedFile.name}`,
+          })
 
           // Auto-detect recipient name field
           const nameFields = headersRow.filter((h) => 
@@ -165,13 +188,23 @@ export default function CertificateGeneratorStandalone() {
 
           setError("")
         } catch (parseError) {
-          setError("Failed to parse file. Please check the format.")
+          const errorMsg = "Failed to parse file. Please check the format."
+          setError(errorMsg)
+          notifications.showError({
+            title: 'File parsing error',
+            description: errorMsg,
+          })
           console.error(parseError)
         }
       }
 
       reader.onerror = () => {
-        setError("Failed to read file")
+        const errorMsg = "Failed to read file"
+        setError(errorMsg)
+        notifications.showError({
+          title: 'File read error',
+          description: errorMsg,
+        })
       }
 
       if (uploadedFile.name.endsWith(".csv")) {
@@ -180,7 +213,12 @@ export default function CertificateGeneratorStandalone() {
         reader.readAsArrayBuffer(uploadedFile)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to parse file")
+      const errorMsg = err instanceof Error ? err.message : "Failed to parse file"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'File upload error',
+        description: errorMsg,
+      })
     }
   }
 
@@ -246,13 +284,23 @@ export default function CertificateGeneratorStandalone() {
     const hasValidMimeType = validMimeTypes.includes(file.type.toLowerCase())
 
     if (!hasValidExtension && !hasValidMimeType) {
-      setError("Please upload a PNG or JPG image file. Supported formats: .png, .jpg, .jpeg")
+      const errorMsg = "Please upload a PNG or JPG image file. Supported formats: .png, .jpg, .jpeg"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Invalid image format',
+        description: errorMsg,
+      })
       return
     }
 
     const maxSize = 10 * 1024 * 1024
     if (file.size > maxSize) {
-      setError(`File size too large. Maximum size is 10MB. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB`)
+      const errorMsg = `File size too large. Maximum size is 10MB. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB`
+      setError(errorMsg)
+      notifications.showError({
+        title: 'File too large',
+        description: errorMsg,
+      })
       return
     }
 
@@ -274,8 +322,17 @@ export default function CertificateGeneratorStandalone() {
       setCustomTemplatePreview(preview)
       setCustomTemplateFile(file)
       setError("")
+      notifications.showSuccess({
+        title: 'Template uploaded successfully!',
+        description: 'You can now position the name field on your template.',
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load image")
+      const errorMsg = err instanceof Error ? err.message : "Failed to load image"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Image load error',
+        description: errorMsg,
+      })
     }
   }
 
@@ -286,7 +343,12 @@ export default function CertificateGeneratorStandalone() {
     const hasValidExtension = validExtensions.some((ext) => fileName.endsWith(ext))
 
     if (!hasValidExtension) {
-      setError("Please upload a PNG or JPG image file for logo")
+      const errorMsg = "Please upload a PNG or JPG image file for logo"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Invalid logo format',
+        description: errorMsg,
+      })
       return
     }
 
@@ -295,8 +357,17 @@ export default function CertificateGeneratorStandalone() {
       setLogoPreview(preview)
       setLogoFile(file)
       setError("")
+      notifications.showSuccess({
+        title: 'Logo uploaded!',
+        description: 'Logo will be added to certificates.',
+      })
     } catch (err) {
-      setError("Failed to load logo")
+      const errorMsg = "Failed to load logo"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Logo upload error',
+        description: errorMsg,
+      })
     }
   }
 
@@ -307,7 +378,12 @@ export default function CertificateGeneratorStandalone() {
     const hasValidExtension = validExtensions.some((ext) => fileName.endsWith(ext))
 
     if (!hasValidExtension) {
-      setError("Please upload a PNG or JPG image file for signature")
+      const errorMsg = "Please upload a PNG or JPG image file for signature"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Invalid signature format',
+        description: errorMsg,
+      })
       return
     }
 
@@ -316,8 +392,17 @@ export default function CertificateGeneratorStandalone() {
       setSignaturePreview(preview)
       setSignatureFile(file)
       setError("")
+      notifications.showSuccess({
+        title: 'Signature uploaded!',
+        description: 'Signature will be added to certificates.',
+      })
     } catch (err) {
-      setError("Failed to load signature")
+      const errorMsg = "Failed to load signature"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Signature upload error',
+        description: errorMsg,
+      })
     }
   }
 
@@ -329,12 +414,19 @@ export default function CertificateGeneratorStandalone() {
   // Generate preview
   const generatePreview = async () => {
     if (!previewRow) {
-      setError("Unable to generate preview. Please ensure field mapping is set up correctly.")
+      const errorMsg = "Unable to generate preview. Please ensure field mapping is set up correctly."
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Preview error',
+        description: errorMsg,
+      })
       return
     }
 
     if (!fieldMapping.recipientName) {
-      setError("Please map the recipient name field")
+      const errorMsg = "Please map the recipient name field"
+      setError(errorMsg)
+      notifications.showWarning(errorMsg)
       return
     }
 
@@ -465,6 +557,10 @@ export default function CertificateGeneratorStandalone() {
         
         setShowPreview(true)
         setError("")
+        notifications.showSuccess({
+          title: 'Preview generated!',
+          description: 'Certificate preview is ready.',
+        })
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to generate preview"
@@ -476,6 +572,10 @@ export default function CertificateGeneratorStandalone() {
         URL.revokeObjectURL(previewPdfUrl)
         setPreviewPdfUrl(null)
       }
+      notifications.showError({
+        title: 'Preview generation failed',
+        description: errorMessage,
+      })
     }
   }
 
@@ -492,23 +592,44 @@ export default function CertificateGeneratorStandalone() {
   const handleGenerateAndDownload = async () => {
     const validation = validateFieldMapping(fieldMapping)
     if (!validation.valid) {
-      setError(validation.errors.join(", "))
+      const errorMsg = validation.errors.join(", ")
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Validation error',
+        description: errorMsg,
+      })
       return
     }
 
     if (rows.length === 0) {
-      setError("Please upload an Excel/CSV file first")
+      const errorMsg = "Please upload an Excel/CSV file first"
+      setError(errorMsg)
+      notifications.showWarning(errorMsg)
       return
     }
 
     if (useCustomTemplate && !customTemplateFile) {
-      setError("Please upload a custom template image")
+      const errorMsg = "Please upload a custom template image"
+      setError(errorMsg)
+      notifications.showError({
+        title: 'Missing template',
+        description: errorMsg,
+      })
+      return
+    }
+
+    if (activeRows.length === 0) {
+      const errorMsg = "No active recipients to generate certificates for"
+      setError(errorMsg)
+      notifications.showWarning(errorMsg)
       return
     }
 
     setGenerating(true)
     setError("")
     setGenerationProgress(0)
+    
+    notifications.showInfo(`Generating ${activeRows.length} certificate${activeRows.length > 1 ? 's' : ''}...`)
 
     try {
       let pdfFiles: Array<{ name: string; blob: string }> = []
@@ -642,10 +763,24 @@ export default function CertificateGeneratorStandalone() {
       URL.revokeObjectURL(url)
 
       setError("")
+      
+      // Show success notification
+      notifications.showSuccess({
+        title: 'Certificates generated successfully!',
+        description: `Generated ${pdfFiles.length} certificate${pdfFiles.length > 1 ? 's' : ''} and downloaded as ZIP file.`,
+      }, {
+        duration: 6000,
+      })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to generate certificates"
       setError(errorMessage)
       console.error("Certificate generation error:", err)
+      notifications.showError({
+        title: 'Certificate generation failed',
+        description: errorMessage,
+      }, {
+        duration: 5000,
+      })
     } finally {
       setGenerating(false)
     }
@@ -672,30 +807,171 @@ export default function CertificateGeneratorStandalone() {
 
       {/* File Upload Section */}
       {!file && (
-        <div className="bg-card border border-border rounded-lg p-6">
-          <h3 className="font-semibold text-lg mb-4">Upload Excel/CSV File</h3>
-          <div 
-            className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer"
-            onClick={() => document.getElementById("file-upload")?.click()}
-          >
-            <FileUp className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-sm font-medium mb-2">Click to upload or drag and drop</p>
-            <p className="text-xs text-muted-foreground">Excel (.xlsx) or CSV files</p>
-            <input
-              type="file"
-              id="file-upload"
-              accept=".xlsx,.csv"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) {
-                  handleFileUpload(file)
-                }
-              }}
-            />
+        <>
+          {/* File Upload Component - Prominent */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-8 shadow-2xl">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+            
+            <div className="relative">
+              <div 
+                className="relative border-3 border-dashed rounded-xl p-16 text-center transition-all cursor-pointer group border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 hover:scale-[1.01] hover:shadow-lg"
+                onClick={() => document.getElementById("file-upload")?.click()}
+              >
+                <div className="flex flex-col items-center justify-center gap-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+                    <FileUp className="w-16 h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                      Drag and drop your file here
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Or click to browse
+                    </p>
+                    <div className="flex items-center justify-center gap-2 pt-2">
+                      <Badge variant="outline" className="font-semibold">XLSX</Badge>
+                      <Badge variant="outline" className="font-semibold">CSV</Badge>
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  id="file-upload"
+                  accept=".xlsx,.csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      handleFileUpload(file)
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+
+          {/* Format Guide - Below Upload, Less Prominent */}
+          <details className="relative overflow-hidden bg-gradient-to-br from-amber-50/30 via-orange-50/15 to-red-50/30 dark:from-amber-950/10 dark:via-orange-950/5 dark:to-red-950/10 border border-amber-200/30 dark:border-amber-800/20 rounded-xl shadow-md">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-400/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+            
+            <summary className="relative cursor-pointer p-4 flex items-center gap-3 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition-colors">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
+                <Info className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="font-semibold text-sm text-foreground">
+                📋 View Expected File Format (Optional)
+              </h3>
+            </summary>
+            
+            <div className="relative p-5 pt-0 border-t border-border/50">
+              <div className="mb-4">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Your CSV/XLSX file should contain the following columns:
+                </p>
+                
+                <div className="overflow-x-auto rounded-lg border border-border/50 bg-background/80 backdrop-blur-sm shadow-inner max-h-[400px] overflow-y-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead className="sticky top-0 z-10">
+                        <tr className="bg-gradient-to-r from-muted/60 to-muted/40 border-b border-border">
+                          <th className="text-left py-2 px-3 font-semibold text-foreground">Column Name</th>
+                          <th className="text-left py-2 px-3 font-semibold text-foreground">Status</th>
+                          <th className="text-left py-2 px-3 font-semibold text-foreground">Description</th>
+                          <th className="text-left py-2 px-3 font-semibold text-foreground">Example</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/50">
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Name / Recipient Name</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="destructive" className="text-[10px] font-semibold px-1.5 py-0.5">Mandatory</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Full name of recipient</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">John Doe</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Course Title</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Course/program name</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">Advanced Web Dev</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Date</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Certificate date</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">2024-01-15</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Organization</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Issuing organization</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">ABC Academy</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Certificate Title</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Certificate type</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">Certificate of...</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Award Message</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Message above name</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">This certificate...</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Sub Message</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Message below name</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">for completion...</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Signature Position</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Title below signature</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">Manager</td>
+                        </tr>
+                        <tr className="hover:bg-muted/20 transition-colors">
+                          <td className="py-2 px-3 font-mono font-medium text-foreground">Certificate Number</td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0.5">Optional</Badge>
+                          </td>
+                          <td className="py-2 px-3 text-xs text-muted-foreground">Unique cert ID</td>
+                          <td className="py-2 px-3 font-mono text-[10px] text-muted-foreground bg-muted/30 rounded px-1.5 py-0.5 inline-block">CERT-2024-001</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="mt-3 p-2 rounded bg-amber-50/30 dark:bg-amber-950/15 border border-amber-200/30 dark:border-amber-800/20">
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      <strong className="text-foreground">💡</strong> Only <strong className="text-foreground">Name/Recipient Name</strong> is required. 
+                      All other fields are optional with default values available.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </>
+        )}
 
       {file && (
         <div className="bg-card border border-border rounded-lg p-6">
