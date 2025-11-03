@@ -30,6 +30,9 @@ export default function Navbar() {
             <Link href="/" className="text-foreground hover:text-primary transition-colors">
               Home
             </Link>
+            <Link href="/certificates" className="text-foreground hover:text-primary transition-colors">
+              Generate Certificates
+            </Link>
             <Link href="/how-it-works" className="text-foreground hover:text-primary transition-colors">
               How It Works
             </Link>
@@ -62,6 +65,9 @@ export default function Navbar() {
           <div className="md:hidden pb-4 space-y-3 animate-in fade-in duration-200">
             <Link href="/" className="block text-foreground hover:text-primary py-2">
               Home
+            </Link>
+            <Link href="/certificates" className="block text-foreground hover:text-primary py-2">
+              Generate Certificates
             </Link>
             <Link href="/how-it-works" className="block text-foreground hover:text-primary py-2">
               How It Works

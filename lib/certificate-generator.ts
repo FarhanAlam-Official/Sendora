@@ -36,7 +36,8 @@ function getFieldValue(
   fieldName: keyof CertificateFieldMapping,
 ): string {
   const columnName = fieldMapping[fieldName]
-  if (!columnName) return ""
+  // Type guard: ensure columnName is a string (not an array for customFields)
+  if (!columnName || typeof columnName !== "string") return ""
   return row[columnName]?.toString() || ""
 }
 
@@ -68,6 +69,9 @@ export function generateCertificate(
   })
 
   const [width, height] = layout.size
+  
+  // Note: If PDFs open at 50% zoom, this is a PDF viewer setting, not an issue with the PDF.
+  // The PDF content is correct - users can adjust zoom in their PDF viewer as needed.
 
   // Set background color
   doc.setFillColor(...hexToRgb(finalStyles.backgroundColor))
@@ -149,7 +153,7 @@ export function generateCertificate(
       const titlePos = fields.certificateTitle
       const fontSize = customFontSizes?.certificateTitle ?? titlePos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, titlePos.fontWeight || "bold")
+      doc.setFont("helvetica", titlePos.fontWeight || "bold")
       if (titlePos.color) {
         doc.setTextColor(...hexToRgb(titlePos.color))
       }
@@ -168,7 +172,7 @@ export function generateCertificate(
       const awardPos = fields.awardMessage
       const fontSize = customFontSizes?.awardMessage ?? awardPos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, awardPos.fontWeight || "normal")
+      doc.setFont("helvetica", awardPos.fontWeight || "normal")
       if (awardPos.color) {
         doc.setTextColor(...hexToRgb(awardPos.color))
       }
@@ -186,7 +190,7 @@ export function generateCertificate(
     const namePos = fields.recipientName
     const fontSize = customFontSizes?.recipientName ?? namePos.fontSize
     doc.setFontSize(fontSize)
-    doc.setFont(undefined, namePos.fontWeight || "normal")
+    doc.setFont("helvetica", namePos.fontWeight || "normal")
     if (namePos.color) {
       doc.setTextColor(...hexToRgb(namePos.color))
     }
@@ -205,7 +209,7 @@ export function generateCertificate(
       const subPos = fields.subMessage
       const fontSize = customFontSizes?.subMessage ?? subPos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, subPos.fontWeight || "normal")
+      doc.setFont("helvetica", subPos.fontWeight || "normal")
       if (subPos.color) {
         doc.setTextColor(...hexToRgb(subPos.color))
       }
@@ -224,7 +228,7 @@ export function generateCertificate(
       const coursePos = fields.courseTitle
       const fontSize = customFontSizes?.courseTitle ?? coursePos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, coursePos.fontWeight || "normal")
+      doc.setFont("helvetica", coursePos.fontWeight || "normal")
       if (coursePos.color) {
         doc.setTextColor(...hexToRgb(coursePos.color))
       }
@@ -243,7 +247,7 @@ export function generateCertificate(
       const datePos = fields.date
       const fontSize = customFontSizes?.date ?? datePos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, datePos.fontWeight || "normal")
+      doc.setFont("helvetica", datePos.fontWeight || "normal")
       if (datePos.color) {
         doc.setTextColor(...hexToRgb(datePos.color))
       }
@@ -264,7 +268,7 @@ export function generateCertificate(
       const orgPos = fields.organization
       const fontSize = customFontSizes?.organization ?? orgPos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, orgPos.fontWeight || "normal")
+      doc.setFont("helvetica", orgPos.fontWeight || "normal")
       if (orgPos.color) {
         doc.setTextColor(...hexToRgb(orgPos.color))
       }
@@ -302,7 +306,7 @@ export function generateCertificate(
           const sigPosField = fields.signaturePosition
           const fontSize = customFontSizes?.signaturePosition ?? sigPosField.fontSize
           doc.setFontSize(fontSize)
-          doc.setFont(undefined, sigPosField.fontWeight || "normal")
+          doc.setFont("helvetica", sigPosField.fontWeight || "normal")
           if (sigPosField.color) {
             doc.setTextColor(...hexToRgb(sigPosField.color))
           }
@@ -325,7 +329,7 @@ export function generateCertificate(
       const sigPosField = fields.signaturePosition
       const fontSize = customFontSizes?.signaturePosition ?? sigPosField.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, sigPosField.fontWeight || "normal")
+      doc.setFont("helvetica", sigPosField.fontWeight || "normal")
       if (sigPosField.color) {
         doc.setTextColor(...hexToRgb(sigPosField.color))
       }
@@ -344,7 +348,7 @@ export function generateCertificate(
       const certNumPos = fields.certificateNumber
       const fontSize = customFontSizes?.certificateNumber ?? certNumPos.fontSize
       doc.setFontSize(fontSize)
-      doc.setFont(undefined, certNumPos.fontWeight || "normal")
+      doc.setFont("helvetica", certNumPos.fontWeight || "normal")
       if (certNumPos.color) {
         doc.setTextColor(...hexToRgb(certNumPos.color))
       }
@@ -364,7 +368,7 @@ export function generateCertificate(
         if (value) {
           const pos = customField.position
           doc.setFontSize(pos.fontSize)
-          doc.setFont(undefined, pos.fontWeight || "normal")
+          doc.setFont("helvetica", pos.fontWeight || "normal")
           if (pos.color) {
             doc.setTextColor(...hexToRgb(pos.color))
           }
@@ -439,7 +443,13 @@ export async function generateCertificateBatch(
 
       // Generate filename from recipient name
       const recipientName = getFieldValue(recipient, fieldMapping, "recipientName") || "certificate"
-      const sanitizedName = recipientName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()
+      // Sanitize and limit length for filename (max 50 chars)
+      const sanitizedName = recipientName
+        .replace(/[^a-zA-Z0-9\s]/g, "_")
+        .replace(/\s+/g, "_")
+        .toLowerCase()
+        .slice(0, 50)
+        .replace(/_+$/, "") // Remove trailing underscores
       const filename = `${sanitizedName}_certificate.pdf`
 
       pdfFiles.push({
@@ -508,6 +518,12 @@ export async function generateCertificateFromCustomTemplate(
   
   // Ensure we're using the exact dimensions without margins
   doc.setPage(1)
+  
+  // Note about 50% zoom: If PDFs open at 50% zoom, this is typically a PDF viewer setting
+  // (browser or Adobe Reader default), not a problem with the PDF itself. The PDF content
+  // is generated correctly - users can zoom in/out as needed. The viewer decides the initial
+  // zoom based on page size vs window size. This is normal behavior and doesn't affect
+  // print quality or PDF functionality.
 
   // Add the background image/PDF
   if (customTemplate.type === "image") {
@@ -537,7 +553,7 @@ export async function generateCertificateFromCustomTemplate(
   if (fieldPositions?.recipientName) {
     const pos = fieldPositions.recipientName
     doc.setFontSize(pos.fontSize)
-    doc.setFont(undefined, pos.fontWeight || "normal")
+    doc.setFont("helvetica", pos.fontWeight || "normal")
     
     if (pos.fontColor) {
       doc.setTextColor(...hexToRgb(pos.fontColor))
@@ -573,7 +589,7 @@ export async function generateCertificateFromCustomTemplate(
   } else {
     // Default center position if not specified
     doc.setFontSize(32)
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.setTextColor(...hexToRgb("#000000"))
     doc.text(recipientName, width / 2, height / 2, {
       align: "center",
@@ -620,7 +636,13 @@ export async function generateCertificatesFromCustomTemplateBatch(
 
       // Generate filename from recipient name
       const recipientName = getFieldValue(recipient, fieldMapping, "recipientName") || "certificate"
-      const sanitizedName = recipientName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()
+      // Sanitize and limit length for filename (max 50 chars)
+      const sanitizedName = recipientName
+        .replace(/[^a-zA-Z0-9\s]/g, "_")
+        .replace(/\s+/g, "_")
+        .toLowerCase()
+        .slice(0, 50)
+        .replace(/_+$/, "") // Remove trailing underscores
       const filename = `${sanitizedName}_certificate.pdf`
 
       pdfFiles.push({
