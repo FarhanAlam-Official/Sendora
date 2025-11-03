@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { FileUp, X, CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { useSendWizard, type PdfFile } from "./send-wizard-context"
 
 // Limits (can be made configurable)
@@ -88,41 +89,64 @@ export default function StepPdfUpload() {
         </p>
       </div>
 
-      <div className="bg-card border-2 border-dashed border-border rounded-xl p-12 text-center hover:border-primary transition-colors">
-        <FileUp className="w-16 h-16 text-primary mx-auto mb-4" />
-        <p className="text-xs text-muted-foreground mb-4">
-          Limits: Max {MAX_PDF_SIZE_MB}MB per file, {MAX_PDF_COUNT} files maximum
-          <br />
-          <span className="text-amber-600">Note: Total size limited by browser memory and email provider capacity</span>
-        </p>
-
-        <div
-          onDragOver={(e) => {
-            e.preventDefault()
-            setIsDragging(true)
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setIsDragging(false)
-            handleFiles(e.dataTransfer.files)
-          }}
-          className={`border-2 border-dashed rounded-lg p-8 transition-all ${
-            isDragging ? "border-primary bg-primary/5" : "border-border"
-          }`}
-        >
-          <input
-            type="file"
-            multiple
-            accept=".pdf"
-            onChange={(e) => e.target.files && handleFiles(e.target.files)}
-            className="hidden"
-            id="pdf-input"
-          />
-          <label htmlFor="pdf-input" className="cursor-pointer">
-            Drag and drop PDFs or click to browse
-          </label>
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-8 shadow-2xl">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+        
+        <div className="relative">
+          <p className="text-xs text-muted-foreground mb-4 text-center">
+            Limits: Max {MAX_PDF_SIZE_MB}MB per file, {MAX_PDF_COUNT} files maximum
+            <br />
+            <span className="text-amber-600">Note: Total size limited by browser memory and email provider capacity</span>
+          </p>
+          
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsDragging(true)
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsDragging(false)
+              handleFiles(e.dataTransfer.files)
+            }}
+            onClick={() => document.getElementById("pdf-input")?.click()}
+            className={`relative border-3 border-dashed rounded-xl p-16 text-center transition-all cursor-pointer group ${
+              isDragging 
+                ? "border-primary bg-primary/20 scale-[1.02] shadow-xl" 
+                : "border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 hover:scale-[1.01] hover:shadow-lg"
+            }`}
+          >
+            <div className="flex flex-col items-center justify-center gap-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+                <FileUp className="w-16 h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                  Drag and drop PDF files here
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Or click to browse
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <Badge variant="outline" className="font-semibold">PDF</Badge>
+                </div>
+              </div>
+            </div>
+            <input
+              type="file"
+              multiple
+              accept=".pdf"
+              onChange={(e) => e.target.files && handleFiles(e.target.files)}
+              className="hidden"
+              id="pdf-input"
+            />
+          </div>
         </div>
+      </div>
 
         {error && (
           <motion.div

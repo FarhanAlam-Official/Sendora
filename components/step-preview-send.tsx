@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Mail, AlertCircle, CheckCircle, Clock, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSendWizard } from "./send-wizard-context"
+import { notifications } from "@/lib/notifications"
 
 const SEND_COMPLETED_KEY = "sendora_send_completed"
 
@@ -93,14 +94,18 @@ export default function StepPreviewSend() {
   const sendEmails = async () => {
     // Check localStorage as well
     if (hasSent || (typeof window !== "undefined" && localStorage.getItem(SEND_COMPLETED_KEY) === "true")) {
-      setError("Emails have already been sent. Please start a new send to send again.")
+      const errorMsg = "Emails have already been sent. Please start a new send to send again."
+      setError(errorMsg)
       setHasSent(true)
+      notifications.showWarning(errorMsg)
       return
     }
 
     try {
       setSending(true)
       setError("")
+      
+      notifications.showInfo(`Starting to send ${activeRows.length} emails...`)
       
       const recipientCount = activeRows.length
       // Initialize stats before sending
@@ -238,12 +243,43 @@ export default function StepPreviewSend() {
 
       setResults(sendResults)
       setSendResults(sendResults)
-      setStats((prev) => ({ ...prev, progress: 100 }))
+      
+      // Calculate final stats
+      const finalSent = sendResults.filter(r => r.status === "sent").length
+      const finalFailed = sendResults.filter(r => r.status === "failed").length
+      
+      setStats({
+        total: recipientCount,
+        sent: finalSent,
+        failed: finalFailed,
+        progress: 100,
+      })
       
       // Save to localStorage to persist across navigation
       if (typeof window !== "undefined") {
         localStorage.setItem("sendora_send_results", JSON.stringify(sendResults))
         localStorage.setItem(SEND_COMPLETED_KEY, "true")
+      }
+
+      // Show completion toast based on actual results
+      if (finalSent > 0 && finalFailed === 0) {
+        notifications.showSuccess({
+          title: 'All emails sent successfully!',
+          description: `Successfully sent ${finalSent} email${finalSent > 1 ? 's' : ''} to all recipients.`,
+          duration: 5000,
+        })
+      } else if (finalSent > 0 && finalFailed > 0) {
+        notifications.showWarning({
+          title: 'Email sending completed with errors',
+          description: `${finalSent} sent successfully, ${finalFailed} failed. Check the results below for details.`,
+          duration: 6000,
+        })
+      } else if (finalFailed > 0) {
+        notifications.showError({
+          title: 'Failed to send emails',
+          description: `All ${finalFailed} email${finalFailed > 1 ? 's' : ''} failed to send. Please check your SMTP settings and try again.`,
+          duration: 6000,
+        })
       }
     } catch (err) {
       console.error("Send error:", err)
@@ -251,6 +287,11 @@ export default function StepPreviewSend() {
       setError(errorMessage)
       setStats((prev) => ({ ...prev, progress: 100 }))
       setHasSent(false) // Allow retry on error
+      notifications.showError({
+        title: 'Email sending failed',
+        description: errorMessage,
+        duration: 5000,
+      })
     } finally {
       setSending(false)
     }
