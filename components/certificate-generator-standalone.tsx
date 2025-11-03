@@ -2042,7 +2042,7 @@ export default function CertificateGeneratorStandalone() {
             {showPreview && previewPdfUrl ? (
               <div className="border border-border rounded-lg overflow-hidden relative">
                 <iframe
-                  src={`${previewPdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                  src={previewPdfUrl}
                   className="w-full h-[600px]"
                   title="Certificate Preview"
                   style={{ 
