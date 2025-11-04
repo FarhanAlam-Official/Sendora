@@ -4,8 +4,11 @@ export interface CertificateFieldPosition {
   x: number // Position in mm from left
   y: number // Position in mm from top
   fontSize: number
-  fontFamily?: string
+  fontFamily?: string // "helvetica" | "times" | "courier"
   fontWeight?: "normal" | "bold"
+  fontStyle?: "normal" | "italic" | "bold" | "bolditalic"
+  italic?: boolean // Legacy support - maps to fontStyle
+  underline?: boolean
   color?: string
   align?: "left" | "center" | "right"
 }
@@ -78,8 +81,11 @@ export interface CustomTemplateFieldPosition {
   y: number // Y position in mm from top
   fontSize: number
   fontColor?: string
-  fontFamily?: string
+  fontFamily?: string // "helvetica" | "times" | "courier"
   fontWeight?: "normal" | "bold"
+  fontStyle?: "normal" | "italic" | "bold" | "bolditalic"
+  italic?: boolean // Legacy support - maps to fontStyle
+  underline?: boolean
   align?: "left" | "center" | "right"
 }
 

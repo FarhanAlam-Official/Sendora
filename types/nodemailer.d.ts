@@ -1,5 +1,5 @@
 declare module 'nodemailer' {
-  interface TransportOptions {
+  export interface TransportOptions {
     host?: string;
     port?: number;
     secure?: boolean;
@@ -9,25 +9,33 @@ declare module 'nodemailer' {
     };
   }
 
-  interface MailOptions {
+  export interface MailOptions {
     from?: string;
     to: string | string[];
     subject: string;
     html?: string;
     text?: string;
+    attachments?: Array<{
+      filename?: string;
+      content?: Buffer | string;
+    }>;
   }
 
-  interface Transporter {
-    sendMail(mailOptions: MailOptions): Promise<any>;
+  export interface Transporter {
+    sendMail(mailOptions: MailOptions): Promise<{ messageId: string }>;
   }
 
-  function createTransport(options: TransportOptions): Transporter;
+  export function createTransport(options: TransportOptions): Transporter;
   
   const nodemailer: {
     createTransport: typeof createTransport;
   };
   
   export default nodemailer;
-  export { createTransport };
+}
+
+// Export types as a namespace for access via nodemailer.Transporter
+declare namespace nodemailer {
+  export type Transporter = import('nodemailer').Transporter;
 }
 
