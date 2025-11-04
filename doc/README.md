@@ -52,6 +52,14 @@ Detailed documentation for React components:
 - [UI Components](./component/Ui-Components.md)
 - [Certificate Components](./component/Certificate-Components.md)
 
+### 🔍 [SEO Documentation](./seo/)
+Search engine optimization guides and resources:
+- [SEO Summary](./seo/Seo-Summary.md)
+- [SEO Quick Start](./seo/Seo-Quick-Start.md)
+- [SEO Implementation Guide](./seo/Seo-Implementation-Guide.md)
+- [SEO Files Overview](./seo/Seo-Files-Overview.md)
+- [SEO Action Plan](./seo/Seo-Action-Plan.md)
+
 ## Quick Links
 
 - [Installation Guide](./guide/Getting-Started.md#installation)
