@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 
+/**
+ * Default SMTP configuration from environment variables
+ * Used when no custom SMTP is provided
+ */
 const DEFAULT_SMTP = {
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: Number.parseInt(process.env.SMTP_PORT || "587"),
@@ -11,10 +15,28 @@ const DEFAULT_SMTP = {
   },
 }
 
+/**
+ * Maximum number of retry attempts for sending emails
+ */
 const MAX_RETRIES = 3
+
+/**
+ * Delay between retry attempts in milliseconds
+ */
 const RETRY_DELAY = 1000 // ms
 
-async function sendWithRetry(transporter: nodemailer.Transporter, mailOptions: any, retries = 0): Promise<any> {
+/**
+ * Helper function to send emails with retry logic
+ * 
+ * This function attempts to send an email and will retry up to MAX_RETRIES times
+ * with a delay between each attempt if the initial send fails.
+ * 
+ * @param transporter - Nodemailer transporter instance
+ * @param mailOptions - Email options including recipient, subject, body, and attachments
+ * @param retries - Current retry attempt count (starts at 0)
+ * @returns Promise resolving to the send result
+ */
+async function sendWithRetry(transporter: any, mailOptions: any, retries = 0): Promise<any> {
   try {
     console.log(`[Email] Attempting to send to ${mailOptions.to} (attempt ${retries + 1}/${MAX_RETRIES})`)
     const result = await transporter.sendMail(mailOptions)
@@ -30,10 +52,27 @@ async function sendWithRetry(transporter: nodemailer.Transporter, mailOptions: a
   }
 }
 
+/**
+ * POST handler for the single email sending API endpoint
+ * 
+ * This endpoint sends a single email with the following features:
+ * 1. Support for both default and custom SMTP configurations
+ * 2. Email validation
+ * 3. PDF attachment support
+ * 4. Retry mechanism for failed sends
+ * 5. Detailed error reporting
+ * 
+ * The function validates the request, configures the appropriate SMTP transporter,
+ * prepares attachments if provided, and sends the email with retry logic.
+ * 
+ * @param request - Next.js request object containing email data
+ * @returns NextResponse with success or error status
+ */
 export async function POST(request: NextRequest) {
   try {
     const { to, subject, body, smtpConfig, customSMTP, pdfAttachment } = await request.json()
 
+    // Validate required fields
     if (!to || !subject || !body) {
       return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 })
     }
@@ -83,6 +122,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No SMTP configuration selected" }, { status: 400 })
     }
 
+    // Prepare attachments if provided
     const attachments: any[] = []
     if (pdfAttachment) {
       attachments.push({
@@ -91,6 +131,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Send the email with retry logic
     const result = await sendWithRetry(transporter, {
       from: fromEmail,
       to,

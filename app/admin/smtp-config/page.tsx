@@ -8,16 +8,36 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { notifications } from "@/lib/notifications"
 
+/**
+ * SMTP Configuration Page Component
+ * 
+ * This admin page allows users to configure custom SMTP settings for email delivery.
+ * It provides functionality to:
+ * - Input and save SMTP configuration details (host, port, email, password)
+ * - Test the SMTP connection to verify settings
+ * - Display success/error feedback for user actions
+ * 
+ * The component uses localStorage to persist settings between sessions and
+ * communicates with the backend API to test SMTP connections.
+ */
 export default function SMTPConfigPage() {
+  // State for SMTP configuration values
   const [smtp, setSMTP] = useState({
     host: "",
     port: "587",
     email: "",
     password: "",
   })
+  
+  // Loading state for connection testing
   const [testing, setTesting] = useState(false)
+  
+  // Result state for connection testing feedback
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
 
+  /**
+   * Load saved SMTP configuration from localStorage on component mount
+   */
   useEffect(() => {
     const saved = localStorage.getItem("sendora_smtp_custom")
     if (saved) {
@@ -25,6 +45,9 @@ export default function SMTPConfigPage() {
     }
   }, [])
 
+  /**
+   * Save SMTP configuration to localStorage and show success notification
+   */
   const handleSave = () => {
     localStorage.setItem("sendora_smtp_custom", JSON.stringify(smtp))
     notifications.showSuccess({
@@ -33,7 +56,12 @@ export default function SMTPConfigPage() {
     })
   }
 
+  /**
+   * Test SMTP connection by sending configuration to backend API
+   * Validates required fields before testing and handles success/error responses
+   */
   const handleTest = async () => {
+    // Validate required fields before testing
     if (!smtp.host || !smtp.email || !smtp.password) {
       setTestResult({ success: false, message: "Please fill in all fields" })
       return
@@ -43,6 +71,7 @@ export default function SMTPConfigPage() {
     setTestResult(null)
 
     try {
+      // Send SMTP configuration to backend for testing
       const response = await fetch("/api/testSMTP", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,6 +79,8 @@ export default function SMTPConfigPage() {
       })
 
       const data = await response.json()
+      
+      // Handle successful connection test
       if (response.ok) {
         setTestResult({ success: true, message: "Connection successful!" })
         notifications.showSuccess({
@@ -57,6 +88,7 @@ export default function SMTPConfigPage() {
           description: 'Your SMTP settings are working correctly.',
         })
       } else {
+        // Handle failed connection test
         const errorMessage = data.error || "Connection failed"
         setTestResult({ success: false, message: errorMessage })
         notifications.showError({
@@ -65,6 +97,7 @@ export default function SMTPConfigPage() {
         })
       }
     } catch (error) {
+      // Handle network errors or other exceptions
       const errorMessage = "Failed to test connection"
       setTestResult({ success: false, message: errorMessage })
       notifications.showError({
@@ -72,6 +105,7 @@ export default function SMTPConfigPage() {
         description: 'Unable to connect to the SMTP server. Please check your settings.',
       })
     } finally {
+      // Reset loading state regardless of test outcome
       setTesting(false)
     }
   }
@@ -96,6 +130,7 @@ export default function SMTPConfigPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* SMTP Host Input */}
             <div>
               <label className="text-sm font-medium mb-2 block">SMTP Host</label>
               <Input
@@ -104,6 +139,8 @@ export default function SMTPConfigPage() {
                 placeholder="smtp.gmail.com"
               />
             </div>
+            
+            {/* Port Input */}
             <div>
               <label className="text-sm font-medium mb-2 block">Port</label>
               <Input
@@ -112,6 +149,8 @@ export default function SMTPConfigPage() {
                 placeholder="587"
               />
             </div>
+            
+            {/* Email Input */}
             <div>
               <label className="text-sm font-medium mb-2 block">Email</label>
               <Input
@@ -121,6 +160,8 @@ export default function SMTPConfigPage() {
                 placeholder="your@email.com"
               />
             </div>
+            
+            {/* Password Input with App Password guidance */}
             <div>
               <label className="text-sm font-medium mb-2 block">Password / App Password</label>
               <Input
@@ -142,6 +183,7 @@ export default function SMTPConfigPage() {
               </p>
             </div>
 
+            {/* Test Result Feedback */}
             {testResult && (
               <Alert variant={testResult.success ? "default" : "destructive"}>
                 {testResult.success ? (
@@ -153,6 +195,7 @@ export default function SMTPConfigPage() {
               </Alert>
             )}
 
+            {/* Action Buttons */}
             <div className="flex gap-2">
               <Button onClick={handleTest} disabled={testing || !smtp.host || !smtp.email || !smtp.password} variant="outline" className="flex-1">
                 {testing ? (

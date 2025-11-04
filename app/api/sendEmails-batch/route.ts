@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 
+/**
+ * Interface for batch email request data
+ */
 interface BatchEmailRequest {
   emails: Array<{
     to: string
@@ -21,6 +24,9 @@ interface BatchEmailRequest {
   delayBetween?: number
 }
 
+/**
+ * Interface for batch email response data
+ */
 interface BatchEmailResponse {
   success: number
   failed: number
@@ -33,11 +39,29 @@ interface BatchEmailResponse {
   totalTime: number
 }
 
+/**
+ * POST handler for the batch email sending API endpoint
+ * 
+ * This endpoint sends multiple emails in a batch with the following features:
+ * 1. Support for both default and custom SMTP configurations
+ * 2. Configurable delay between email sends
+ * 3. Detailed result tracking for each email
+ * 4. Performance timing
+ * 5. Error handling for individual email failures
+ * 
+ * The function processes each email in sequence with a delay between sends
+ * to avoid overwhelming the SMTP server. It tracks success and failure counts
+ * and provides detailed results for each email attempt.
+ * 
+ * @param request - Next.js request object containing batch email data
+ * @returns NextResponse with batch processing results
+ */
 export async function POST(request: NextRequest): Promise<NextResponse<BatchEmailResponse | { error: string }>> {
   try {
     const body: BatchEmailRequest = await request.json()
     const { emails, smtpConfig, customSMTP, delayBetween = 500 } = body
 
+    // Validate email array
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return NextResponse.json({ error: "No emails provided" }, { status: 400 })
     }
@@ -47,6 +71,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
     let successCount = 0
     let failedCount = 0
 
+    /**
+     * Default SMTP configuration from environment variables
+     * Used when no custom SMTP is provided
+     */
     const DEFAULT_SMTP = {
       host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: Number.parseInt(process.env.SMTP_PORT || "587"),
@@ -80,6 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
     // Send each email with delay
     for (const email of emails) {
       try {
+        // Prepare attachments if provided
         const attachments: any[] = []
         if (email.pdfAttachment) {
           attachments.push({
@@ -88,6 +117,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
           })
         }
 
+        // Send the email
         const result = await transporter.sendMail({
           from: fromEmail,
           to: email.to,
@@ -96,6 +126,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
           attachments,
         })
 
+        // Track successful send
         results.push({
           email: email.to,
           success: true,
@@ -104,6 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
         successCount++
         console.log(`[Batch] Sent to ${email.to}`)
       } catch (error) {
+        // Track failed send
         const errorMsg = error instanceof Error ? error.message : "Unknown error"
         results.push({
           email: email.to,
@@ -114,7 +146,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
         console.error(`[Batch] Failed to send to ${email.to}: ${errorMsg}`)
       }
 
-      // Delay between emails
+      // Delay between emails (except for the last email)
       if (emails.indexOf(email) < emails.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, delayBetween))
       }

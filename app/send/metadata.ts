@@ -1,5 +1,18 @@
 import { Metadata } from 'next'
 
+/**
+ * Metadata configuration for the Send Wizard page
+ * 
+ * This file defines the SEO metadata for the main certificate/email sending workflow page, including:
+ * - Page title and description optimized for the sending process
+ * - Keywords for search engine optimization
+ * - Open Graph tags for social media sharing
+ * - Twitter card configuration
+ * - Canonical URL for proper indexing
+ * 
+ * The metadata emphasizes the core functionality of the Sendora platform
+ * to attract users looking to send certificates and emails in bulk.
+ */
 export const metadata: Metadata = {
   title: "Send Bulk Emails & Certificates - Start Now",
   description: "Start sending bulk personalized emails and certificates now. Upload your Excel/CSV file, map fields, and distribute certificates to hundreds of recipients in minutes. Free and secure.",

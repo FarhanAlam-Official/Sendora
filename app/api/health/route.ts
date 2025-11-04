@@ -1,8 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 
+/**
+ * GET handler for the health check API endpoint
+ * 
+ * This endpoint provides system health status information including:
+ * 1. API operational status
+ * 2. SMTP configuration status
+ * 3. SMTP connection verification (if configured)
+ * 
+ * The health check helps monitor the application's operational status
+ * and verifies that required services like SMTP are properly configured.
+ * 
+ * @param request - Next.js request object
+ * @returns NextResponse with health status information
+ */
 export async function GET(request: NextRequest) {
   try {
+    /**
+     * Default SMTP configuration from environment variables
+     * Used when no custom SMTP is provided
+     */
     const DEFAULT_SMTP = {
       host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: Number.parseInt(process.env.SMTP_PORT || "587"),
@@ -13,6 +31,9 @@ export async function GET(request: NextRequest) {
       },
     }
 
+    /**
+     * Health status object containing API and SMTP information
+     */
     const status = {
       api: "operational",
       timestamp: new Date().toISOString(),
@@ -27,7 +48,8 @@ export async function GET(request: NextRequest) {
     if (DEFAULT_SMTP.auth.user && DEFAULT_SMTP.auth.pass) {
       try {
         const transporter = nodemailer.createTransport(DEFAULT_SMTP)
-        await transporter.verify()
+        // Use verify method to test SMTP connection (type assertion to avoid TS error)
+        await (transporter as any).verify()
         return NextResponse.json({
           ...status,
           smtp: {

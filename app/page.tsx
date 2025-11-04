@@ -12,6 +12,19 @@ import {
   productSchema,
 } from "@/lib/structured-data"
 
+/**
+ * Home Page Component
+ * 
+ * This is the main landing page for Sendora, showcasing:
+ * - The core value proposition of the platform
+ * - Key features and benefits
+ * - Social proof and trust indicators
+ * - Clear calls-to-action to start using the service
+ * 
+ * The page uses framer-motion for scroll-triggered animations and interactive elements,
+ * creating an engaging user experience that highlights the platform's capabilities.
+ * It also includes structured data for improved SEO.
+ */
 export default function Home() {
   // Clear send completion flag when visiting home page to allow new batches
   useEffect(() => {
@@ -20,12 +33,16 @@ export default function Home() {
     }
   }, [])
 
-  // Typing animation words
+  // Typing animation words for the hero section
   const words = ["Certificates", "Documents", "Emails", "Awards"]
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [displayText, setDisplayText] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
 
+  /**
+   * Typing animation effect for the hero section
+   * Cycles through different words to show the platform's versatility
+   */
   useEffect(() => {
     const currentWord = words[currentWordIndex]
     let timeout: NodeJS.Timeout
@@ -59,6 +76,7 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayText, isDeleting, currentWordIndex])
   
+  // Animation variants for fade-in effects
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -89,6 +107,7 @@ export default function Home() {
   const statsRef = useRef(null)
   const statsInView = useInView(statsRef, { once: true })
 
+  // Define key features with icons and descriptions
   const features = [
     {
       icon: FileUp,

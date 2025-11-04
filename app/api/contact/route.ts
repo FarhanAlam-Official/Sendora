@@ -1,8 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 
+/**
+ * Administrator email address for contact form submissions
+ * Defaults to admin@sendora.app if not set in environment variables
+ */
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@sendora.app"
 
+/**
+ * Nodemailer transporter configuration for sending emails
+ * Uses environment variables for SMTP configuration with fallback values
+ */
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number.parseInt(process.env.SMTP_PORT || "587"),
@@ -17,6 +25,21 @@ const transporter = nodemailer.createTransport({
     : {}),
 })
 
+/**
+ * POST handler for the contact form API endpoint
+ * 
+ * This endpoint processes contact form submissions by:
+ * 1. Validating required fields (name, email, message)
+ * 2. Sending an email notification to the administrator
+ * 3. Sending a confirmation email to the submitter
+ * 4. Implementing security measures like HTML escaping to prevent XSS
+ * 
+ * The function sends both emails in parallel for better performance
+ * and returns appropriate success or error responses.
+ * 
+ * @param request - Next.js request object containing form data
+ * @returns NextResponse with success or error status
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -24,11 +47,15 @@ export async function POST(request: NextRequest) {
     const email = formData.get("email") as string
     const message = formData.get("message") as string
 
+    // Validate required fields
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Get base URL for logo
+    /**
+     * Helper function to determine the base URL for logo embedding
+     * Tries multiple sources to find the correct origin
+     */
     const getBaseUrl = () => {
       // Try origin header first
       const origin = request.headers.get("origin")
@@ -47,13 +74,15 @@ export async function POST(request: NextRequest) {
       }
       
       // Fallback to default
-      return "https://sendora.app"
+      return "https://sendoraa.vercel.app"
     }
     
     const baseUrl = getBaseUrl()
     const logoUrl = `${baseUrl}/logo.png`
 
-    // Escape HTML to prevent XSS
+    /**
+     * Helper function to escape HTML characters to prevent XSS attacks
+     */
     const escapeHtml = (text: string) => {
       return text
         .replace(/&/g, "&amp;")
@@ -63,6 +92,7 @@ export async function POST(request: NextRequest) {
         .replace(/'/g, "&#039;")
     }
 
+    // Escape user inputs for security
     const escapedName = escapeHtml(name)
     const escapedEmail = escapeHtml(email)
     // Escape HTML first, then convert newlines to <br> tags

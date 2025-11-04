@@ -5,7 +5,21 @@ import Image from "next/image"
 import { Heart, Users, Zap, Github, Mail, FileText, Sparkles, Paintbrush, Award, Download, Rocket, Shield, Globe, Code } from "lucide-react"
 import Link from "next/link"
 
+/**
+ * About Page Component
+ * 
+ * This component renders the About page for Sendora, showcasing:
+ * - Company mission and values
+ * - Key features of the certificate distribution platform
+ * - Technology stack used in development
+ * - Information about the developer
+ * 
+ * The page utilizes framer-motion for smooth animations and interactive elements,
+ * creating an engaging user experience that highlights the platform's capabilities.
+ */
 export default function About() {
+  // Define features array for certificate generation capabilities
+  // Each feature includes an icon, title, description, and color gradient
   const features = [
     {
       icon: FileText,
@@ -33,6 +47,8 @@ export default function About() {
     },
   ]
 
+  // Define company values with icons and descriptions
+  // These represent the core principles behind Sendora's development
   const values = [
     {
       icon: Heart,
@@ -54,6 +70,8 @@ export default function About() {
     },
   ]
 
+  // Technology stack used in building Sendora
+  // Displays the modern tools and frameworks powering the platform
   const techStack = [
     { icon: Code, label: "Next.js", color: "from-gray-700 to-gray-900" },
     { icon: Rocket, label: "Vercel", color: "from-black to-gray-800" },
@@ -61,12 +79,16 @@ export default function About() {
     { icon: Globe, label: "Modern Web", color: "from-blue-600 to-cyan-600" },
   ]
 
+  // Animation variants for fade-in effects
+  // Controls the entrance animation for page elements
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
   }
 
+  // Stagger container for sequencing child animations
+  // Creates a cascading effect when multiple elements animate in sequence
   const staggerContainer = {
     animate: {
       transition: {
@@ -78,7 +100,9 @@ export default function About() {
   return (
     <main className="pt-24 pb-16 relative overflow-hidden min-h-screen">
       {/* Enhanced Background Elements */}
+      {/* Animated gradient blobs that create a dynamic background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
+        {/* Top-right animated gradient blob */}
         <motion.div
           animate={{
             opacity: [0.3, 0.5, 0.3],
@@ -91,6 +115,7 @@ export default function About() {
           }}
           className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl"
         ></motion.div>
+        {/* Bottom-left animated gradient blob */}
         <motion.div
           animate={{
             opacity: [0.3, 0.5, 0.3],
@@ -104,6 +129,7 @@ export default function About() {
           }}
           className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tl from-accent/20 to-primary/20 rounded-full blur-3xl"
         ></motion.div>
+        {/* Center animated gradient blob */}
         <motion.div
           animate={{
             opacity: [0.2, 0.4, 0.2],
@@ -120,10 +146,12 @@ export default function About() {
       </div>
 
       {/* Animated Grid Background */}
+      {/* Subtle dot grid pattern for visual texture */}
       <div className="absolute inset-0 -z-10" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.05) 1px, transparent 0)" }}></div>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         {/* Hero Section with Logo */}
+        {/* Main introduction area with animated logo and tagline */}
         <motion.div
           initial="initial"
           animate="animate"
@@ -134,7 +162,7 @@ export default function About() {
             variants={fadeInUp}
             className="flex flex-col items-center justify-center mb-12"
           >
-            {/* Badge */}
+            {/* Animated badge showing platform capabilities */}
             <motion.div
               whileHover={{ scale: 1.05 }}
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-full mb-6 backdrop-blur-sm shadow-lg"
@@ -148,7 +176,7 @@ export default function About() {
               <span className="text-sm font-semibold text-primary">Smart Certificate Distribution</span>
             </motion.div>
 
-            {/* Title with Logo */}
+            {/* Main title with animated logo */}
             <motion.h1
               variants={fadeInUp}
               className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 text-center flex flex-wrap items-center justify-center gap-3 md:gap-4 lg:gap-6"
@@ -189,6 +217,7 @@ export default function About() {
             </motion.h1>
           </motion.div>
 
+          {/* Description paragraphs explaining the platform's purpose */}
           <motion.div
             variants={fadeInUp}
             className="prose prose-invert max-w-none space-y-6"
@@ -204,6 +233,7 @@ export default function About() {
               data, map your fields, preview your email, and send—all in minutes.
             </p>
 
+            {/* Developer attribution section */}
             <motion.div
               variants={fadeInUp}
               className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20 backdrop-blur-sm"
@@ -216,6 +246,7 @@ export default function About() {
         </motion.div>
 
         {/* Certificate Generation Features */}
+        {/* Feature showcase section with animated cards */}
         <motion.div
           initial="initial"
           whileInView="animate"
@@ -232,6 +263,7 @@ export default function About() {
             </p>
           </motion.div>
 
+          {/* Feature cards grid */}
           <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             {features.map((feature, idx) => (
               <motion.div
@@ -244,6 +276,7 @@ export default function About() {
                 {/* Hover Gradient Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                 
+                {/* Feature icon with animated gradient background */}
                 <div className={`relative inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
                   <feature.icon className="w-8 h-8 text-white" />
                   <motion.div
@@ -263,6 +296,7 @@ export default function About() {
         </motion.div>
 
         {/* Values Section */}
+        {/* Company values displayed in a responsive grid */}
         <motion.div
           initial="initial"
           whileInView="animate"
@@ -278,6 +312,7 @@ export default function About() {
                 whileHover={{ y: -4, scale: 1.02 }}
                 className="group text-center p-6 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 hover:border-primary/30 transition-all hover:shadow-xl"
               >
+                {/* Value icon with gradient background */}
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${value.color} mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                   <value.icon className="w-8 h-8 text-white" />
                 </div>
@@ -289,6 +324,7 @@ export default function About() {
         </motion.div>
 
         {/* Tech Stack Section */}
+        {/* Technology stack visualization */}
         <motion.div
           initial="initial"
           whileInView="animate"
@@ -305,6 +341,7 @@ export default function About() {
             </p>
           </motion.div>
 
+          {/* Tech stack items in a flexible grid */}
           <motion.div variants={staggerContainer} className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
             {techStack.map((tech, idx) => (
               <motion.div
@@ -323,6 +360,7 @@ export default function About() {
         </motion.div>
 
         {/* Developer Section */}
+        {/* Developer profile section with animated elements */}
         <motion.div
           initial="initial"
           whileInView="animate"
@@ -332,6 +370,7 @@ export default function About() {
         >
           {/* Organic Background Elements - No Card Border */}
           <div className="absolute inset-0 -z-10 overflow-hidden">
+            {/* Floating background elements for visual interest */}
             <motion.div
               animate={{
                 x: [0, 30, -20, 0],
@@ -372,7 +411,7 @@ export default function About() {
                 variants={fadeInUp}
                 className="relative text-center md:text-left space-y-8 order-2 md:order-1"
               >
-                {/* Floating Badge */}
+                {/* Developer role badge */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -387,6 +426,7 @@ export default function About() {
                   <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
                     Meet the <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">Developer</span>
                   </h2>
+                  {/* Animated divider line */}
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: "100px" }}
@@ -396,6 +436,7 @@ export default function About() {
                   ></motion.div>
                 </div>
                 
+                {/* Developer bio paragraph */}
                 <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed max-w-2xl">
                   Sendora was created by <span className="font-bold text-foreground bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Farhan Alam</span>, a passionate
                   full-stack developer dedicated to building tools that solve real-world problems. With expertise in
@@ -403,7 +444,7 @@ export default function About() {
                   certificate distribution simple, fast, and accessible to everyone.
                 </p>
 
-                {/* Social Links - More Prominent */}
+                {/* Social links for connecting with the developer */}
                 <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 pt-6">
                   <motion.div
                     whileHover={{ scale: 1.08, y: -4 }}
@@ -438,7 +479,7 @@ export default function About() {
                   </motion.div>
                 </div>
 
-                {/* Quote - Floating Design */}
+                {/* Developer quote section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}

@@ -5,8 +5,27 @@ import { showToast } from '@/components/ui/toast'
 import { notifications } from '@/lib/notifications'
 import { CheckCircle2, XCircle, AlertTriangle, Info, Loader2, Sparkles, Zap } from 'lucide-react'
 
+/**
+ * Toast Demo Page Component
+ * 
+ * This component serves as a comprehensive demonstration of the toast notification system.
+ * It showcases:
+ * - All basic toast types (success, error, warning, info)
+ * - Advanced features (promise-based toasts, custom durations, multiple toasts)
+ * - Real-world usage examples
+ * - Code snippets for implementation guidance
+ * 
+ * The page is designed for developers to test and understand the notification system
+ * before integrating it into their own components.
+ */
 export default function ToastDemoPage() {
-  // Helper function to simulate async operations
+  /**
+   * Helper function to simulate async operations for promise-based toast demos
+   * 
+   * @param shouldSucceed - Whether the promise should resolve or reject
+   * @param delay - Time in milliseconds before the promise resolves/rejects
+   * @returns A promise that resolves or rejects after the specified delay
+   */
   const simulatePromise = (shouldSucceed: boolean = true, delay: number = 2000) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -498,4 +517,3 @@ notifications.showWarning('Warning message')`}</code>
     </div>
   )
 }
-

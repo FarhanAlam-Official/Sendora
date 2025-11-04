@@ -4,10 +4,27 @@ import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 import { Upload, MapPin, Eye, Send, FileUp, FileCheck, Sparkles, BarChart3, Shield, CheckCircle2 } from "lucide-react"
 
+/**
+ * How It Works Page Component
+ * 
+ * This component renders the How It Works page for Sendora, visually explaining
+ * the 5-step process for certificate and email distribution:
+ * 1. Upload Your Data
+ * 2. Upload Certificates
+ * 3. Map Your Fields
+ * 4. Preview & Compose
+ * 5. Configure & Send
+ * 
+ * The page uses framer-motion for scroll-triggered animations and interactive elements,
+ * creating an engaging user experience that guides users through the platform workflow.
+ * Each step includes key features and benefits to help users understand the value.
+ */
 export default function HowItWorks() {
+  // Reference for scroll-triggered animations
   const containerRef = useRef(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
 
+  // Define the 5-step process with icons, descriptions, and features
   const steps = [
     {
       icon: Upload,
@@ -56,12 +73,14 @@ export default function HowItWorks() {
     },
   ]
 
+  // Animation variants for fade-in effects
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
   }
 
+  // Stagger container for sequencing child animations
   const staggerContainer = {
     initial: {},
     animate: {
@@ -131,6 +150,7 @@ export default function HowItWorks() {
                       transition={{ duration: 0.5 }}
                       className="relative"
                     >
+                      {/* Step icon with gradient background */}
                       <div className={`flex items-center justify-center h-24 w-24 rounded-2xl bg-gradient-to-br ${step.color} shadow-lg group-hover:shadow-xl transition-shadow`}>
                         <step.icon className="w-12 h-12 text-white" />
                       </div>

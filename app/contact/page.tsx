@@ -10,10 +10,37 @@ import { Textarea } from "@/components/ui/textarea"
 import { Mail, MessageSquare, User, Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { notifications } from "@/lib/notifications"
 
+/**
+ * Contact Page Component
+ * 
+ * This component renders the Contact page for Sendora, providing users with:
+ * - A contact form for sending messages to the team
+ * - Contact information including email address
+ * - Visual feedback for form submission status
+ * - Responsive design for all device sizes
+ * 
+ * The page uses framer-motion for smooth animations and transitions,
+ * and integrates with the notification system for user feedback.
+ * Form data is submitted to the /api/contact endpoint.
+ */
 export default function Contact() {
+  // State for form submission status
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Reference to the form element for resetting after submission
   const formRef = useRef<HTMLFormElement>(null)
 
+  /**
+   * Handle form submission
+   * 
+   * This function processes the contact form submission by:
+   * 1. Preventing default form behavior
+   * 2. Collecting form data
+   * 3. Sending data to the backend API
+   * 4. Handling success/error responses
+   * 5. Providing user feedback through notifications
+   * 6. Resetting the form on successful submission
+   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
@@ -52,7 +79,7 @@ export default function Contact() {
           // Response was OK, that's what matters
         }
         
-        // Only show success if we got a successful response
+        // Only show success if we haven't already shown a toast
         if (!hasShownToast) {
           notifications.showSuccess({
             title: 'Message sent successfully!',
@@ -107,12 +134,14 @@ export default function Contact() {
     }
   }
 
+  // Animation variants for fade-in effects
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
   }
 
+  // Stagger container for sequencing child animations
   const staggerContainer = {
     animate: {
       transition: {
@@ -211,6 +240,7 @@ export default function Contact() {
             <motion.div variants={fadeInUp} className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl -z-10 blur-xl"></div>
               <form ref={formRef} onSubmit={handleSubmit} className="bg-card border border-border rounded-3xl p-8 shadow-2xl space-y-6">
+                {/* Name Input */}
                 <div className="relative">
                   <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                     <User className="w-4 h-4 text-primary" />
@@ -225,6 +255,7 @@ export default function Contact() {
                   />
                 </div>
 
+                {/* Email Input */}
                 <div className="relative">
                   <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                     <Mail className="w-4 h-4 text-primary" />
@@ -239,6 +270,7 @@ export default function Contact() {
                   />
                 </div>
 
+                {/* Message Textarea */}
                 <div className="relative">
                   <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                     <MessageSquare className="w-4 h-4 text-primary" />
@@ -252,6 +284,7 @@ export default function Contact() {
                   />
                 </div>
 
+                {/* Submit Button */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
