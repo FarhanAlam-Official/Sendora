@@ -1,3 +1,43 @@
+/**
+ * @fileoverview 404 Not Found Page Component - Interactive Astronaut Error Page
+ * @module components/error-pages/NotFoundErrorPage
+ * @description
+ * This component displays a creative and interactive 404 error page featuring
+ * a floating astronaut illustration with physics-based animations.
+ * 
+ * Features:
+ * - Large "404" display with gradient text
+ * - Floating astronaut image with multiple interactions
+ * - Mouse-tracking parallax effect
+ * - Draggable astronaut with constraints
+ * - Continuous floating animation (7s loop)
+ * - Three action buttons: Go Home, Go Back, Learn More
+ * - Floating orbs background animation
+ * - Gradient grid pattern
+ * - Bottom glow effect
+ * - Framer Motion animations
+ * - Dark mode support
+ * 
+ * Interactions:
+ * - Mouse Move: Parallax effect (astronaut follows cursor)
+ * - Hover: Slight scale up (1.06x)
+ * - Tap: Slight scale down (0.98x)
+ * - Drag: Freely draggable within constraints (24px)
+ * - Continuous: Rotating and floating animation
+ * 
+ * Actions:
+ * - Go Home: Navigate to / (homepage)
+ * - Go Back: Browser back navigation
+ * - Learn More: Navigate to /about page
+ * 
+ * @requires react
+ * @requires next/link
+ * @requires next/image
+ * @requires framer-motion
+ * @requires @/components/ui/button
+ * @requires lucide-react
+ */
+
 "use client"
 
 import Link from "next/link"
@@ -6,6 +46,62 @@ import { motion, useMotionValue, useSpring } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Home, Undo2, Compass } from "lucide-react"
 
+/**
+ * 404 Not Found Page Component - Interactive error page with floating astronaut.
+ * 
+ * This component creates an engaging and playful 404 error experience with
+ * advanced Framer Motion animations and interactive elements.
+ * 
+ * Layout Structure:
+ * - Left side: Text content (404, title, description, buttons)
+ * - Right side: Interactive floating astronaut image
+ * - Background: Gradient grid + floating orbs + bottom glow
+ * 
+ * Text Content:
+ * - Main heading: "Lost in cyberspace"
+ * - 404: Large gradient text (7xl on mobile, 9xl on desktop)
+ * - Description: "The page you are looking for doesn't exist..."
+ * - Staggered fade-in animations (0.1s, 0.15s, 0.2s, 0.25s delays)
+ * 
+ * Astronaut Interactions:
+ * 1. Mouse Parallax: Follows mouse with smooth spring physics
+ *    - Range: ±18px in both directions
+ *    - Spring: stiffness=120, damping=14, mass=0.6
+ * 2. Continuous Animation: 7s loop
+ *    - Rotation: -6° to -12° and back
+ *    - Y position: 10px to -10px and back
+ *    - Scale: 0.98 to 1.04 and back
+ * 3. Hover: Scale up to 1.06x
+ * 4. Tap: Scale down to 0.98x
+ * 5. Drag: Free drag with 24px constraints in all directions
+ *    - Elastic: 0.12 (gentle bounce back)
+ * 
+ * Button Actions:
+ * - Go Home: Navigate to / (primary button)
+ * - Go Back: window.history.back() (outline button)
+ * - Learn More: Navigate to /about (ghost button, full-width)
+ * 
+ * Background Elements:
+ * - GradientGrid: Radial + linear grid patterns
+ * - FloatingOrbs: 3 animated blur orbs (220px, 140px, 90px)
+ * - Glow: Bottom primary color glow
+ * 
+ * Responsive Design:
+ * - Mobile: Stacked layout, smaller astronaut
+ * - md: Side-by-side layout, larger astronaut
+ * - All text and spacing scale appropriately
+ * 
+ * @component
+ * @returns {JSX.Element} Interactive 404 page with astronaut
+ * 
+ * @example
+ * ```tsx
+ * // In app/not-found.tsx
+ * export default function NotFound() {
+ *   return <NotFoundErrorPage />
+ * }
+ * ```
+ */
 export default function NotFound() {
   return (
     <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-background px-6 py-16">
@@ -82,6 +178,13 @@ export default function NotFound() {
   )
 }
 
+/**
+ * Gradient Grid Background Component.
+ * Creates decorative background with radial gradient and grid pattern.
+ * 
+ * @component
+ * @returns {JSX.Element} Background gradient and grid
+ */
 function GradientGrid() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
@@ -91,6 +194,13 @@ function GradientGrid() {
   )
 }
 
+/**
+ * Bottom Glow Effect Component.
+ * Creates ambient glow effect at bottom of page.
+ * 
+ * @component
+ * @returns {JSX.Element} Glow effect element
+ */
 function Glow() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-0 flex justify-center">
@@ -99,12 +209,45 @@ function Glow() {
   )
 }
 
+/**
+ * Floating Astronaut Image Component with Interactive Animations.
+ * 
+ * Features:
+ * - Mouse parallax tracking with spring physics
+ * - Continuous floating animation (rotate, y-position, scale)
+ * - Hover scale effect
+ * - Draggable with constraints
+ * - Uses Next.js Image component
+ * 
+ * Mouse Parallax:
+ * - Calculates relative mouse position (0 to 1)
+ * - Converts to ±18px range
+ * - Smooth spring animation (stiffness: 120, damping: 14)
+ * 
+ * Continuous Animation:
+ * - 7s duration with infinite repeat
+ * - Rotation: -6° to -12° (tilt effect)
+ * - Y: 10px to -10px (floating up/down)
+ * - Scale: 0.98 to 1.04 (breathing effect)
+ * 
+ * Drag Behavior:
+ * - Constrained to 24px in all directions
+ * - Elastic bounce back (0.12 elasticity)
+ * - Respects all other animations
+ * 
+ * @component
+ * @returns {JSX.Element} Interactive astronaut image
+ */
 function FloatingAstronautImage() {
   const mx = useMotionValue(0)
   const my = useMotionValue(0)
   const x = useSpring(mx, { stiffness: 120, damping: 14, mass: 0.6 })
   const y = useSpring(my, { stiffness: 120, damping: 14, mass: 0.6 })
 
+  /**
+   * Handles mouse move for parallax effect.
+   * Calculates relative position and sets motion values.
+   */
   function handleMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     const relX = (e.clientX - rect.left) / rect.width
@@ -114,6 +257,9 @@ function FloatingAstronautImage() {
     my.set((relY - 0.5) * range)
   }
 
+  /**
+   * Resets parallax position when mouse leaves.
+   */
   function handleLeave() {
     mx.set(0)
     my.set(0)
@@ -145,6 +291,23 @@ function FloatingAstronautImage() {
   )
 }
 
+/**
+ * Floating Orbs Background Component.
+ * Creates 3 animated blur orbs for depth and atmosphere.
+ * 
+ * Orbs Configuration:
+ * - Orb 1: 220px, left-top, primary color
+ * - Orb 2: 140px, right-middle, foreground color
+ * - Orb 3: 90px, left-bottom, muted-foreground color
+ * 
+ * Animation:
+ * - Each orb floats up and down (±8px)
+ * - Different durations (6s, 8s, 10s) for variation
+ * - Infinite loop with easeInOut
+ * 
+ * @component
+ * @returns {JSX.Element} Animated background orbs
+ */
 function FloatingOrbs() {
   const orbs = [
     { size: 220, x: -280, y: -80, c: "var(--primary)" },
