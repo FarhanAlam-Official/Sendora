@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSendWizard } from "./send-wizard-context"
 import { AlertCircle, CheckCircle2, Loader2, Lock } from "lucide-react"
+import { notifications } from "@/lib/notifications"
 
 /**
  * Step SMTP Component - SMTP configuration wizard step.
@@ -106,7 +107,12 @@ export default function StepSMTP() {
 
   const handleTestConnection = async () => {
     if (configType !== "custom" || !customSMTP.host || !customSMTP.email || !customSMTP.password) {
-      setTestResult({ success: false, message: "Please fill in all fields" })
+      const errorMessage = "Please fill in all fields"
+      setTestResult({ success: false, message: errorMessage })
+      notifications.showError({
+        title: 'Validation error',
+        description: errorMessage,
+      })
       return
     }
 
@@ -122,12 +128,27 @@ export default function StepSMTP() {
 
       const data = await response.json()
       if (response.ok) {
-        setTestResult({ success: true, message: "Connection successful!" })
+        const successMessage = "Connection successful!"
+        setTestResult({ success: true, message: successMessage })
+        notifications.showSuccess({
+          title: 'SMTP connection successful!',
+          description: 'Your SMTP settings are working correctly.',
+        })
       } else {
-        setTestResult({ success: false, message: data.error || "Connection failed" })
+        const errorMessage = data.error || "Connection failed"
+        setTestResult({ success: false, message: errorMessage })
+        notifications.showError({
+          title: 'SMTP connection failed',
+          description: errorMessage,
+        })
       }
     } catch (error) {
-      setTestResult({ success: false, message: "Failed to test connection" })
+      const errorMessage = "Failed to test connection"
+      setTestResult({ success: false, message: errorMessage })
+      notifications.showError({
+        title: 'Connection test failed',
+        description: 'Unable to connect to the SMTP server. Please check your settings.',
+      })
     } finally {
       setTestingConnection(false)
     }

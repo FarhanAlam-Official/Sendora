@@ -52,6 +52,7 @@
 
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer, { type Transporter } from "nodemailer"
+import { createEmailTemplate } from "@/lib/email-template"
 
 /**
  * Default SMTP configuration from environment variables
@@ -183,12 +184,15 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Wrap email body in professional HTML template
+    const htmlBody = createEmailTemplate(body)
+
     // Send the email with retry logic
     const result = await sendWithRetry(transporter, {
       from: fromEmail,
       to,
       subject,
-      html: body,
+      html: htmlBody,
       attachments,
     })
 

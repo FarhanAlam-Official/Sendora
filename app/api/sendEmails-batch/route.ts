@@ -54,6 +54,7 @@
 
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer, { type Transporter } from "nodemailer"
+import { createEmailTemplate } from "@/lib/email-template"
 
 /**
  * TypeScript Interface: Batch Email Request Data
@@ -275,14 +276,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
         }
 
         /**
-         * Send the email via SMTP.
+         * Wrap email body in professional HTML template
+         * and send the email via SMTP.
          * Includes sender, recipient, subject, HTML body, and attachments.
          */
+        const htmlBody = createEmailTemplate(email.body)
+        
         const result = await transporter.sendMail({
           from: fromEmail,
           to: email.to,
           subject: email.subject,
-          html: email.body,
+          html: htmlBody,
           attachments,
         })
 

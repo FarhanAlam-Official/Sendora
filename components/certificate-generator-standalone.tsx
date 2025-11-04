@@ -95,8 +95,20 @@ export default function CertificateGeneratorStandalone() {
   const [xOffset, setXOffset] = useState(0)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoPosition, setLogoPosition] = useState({
+    x: undefined as number | undefined,
+    y: 20,
+    width: 40,
+    height: 40,
+  })
   const [signatureFile, setSignatureFile] = useState<File | null>(null)
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null)
+  const [signaturePosition, setSignaturePosition] = useState({
+    x: undefined as number | undefined,
+    y: undefined as number | undefined,
+    width: 40,
+    height: 20,
+  })
   const [defaultCertificateTitle, setDefaultCertificateTitle] = useState<string>("Certificate of Appreciation")
   const [defaultAwardMessage, setDefaultAwardMessage] = useState<string>("This certificate is awarded to")
   const [defaultSubMessage, setDefaultSubMessage] = useState<string>("for completion of the course")
@@ -623,10 +635,10 @@ export default function CertificateGeneratorStandalone() {
           logo = {
             data: base64,
             name: logoFile.name,
-            width: 40,
-            height: 40,
-            x: undefined,
-            y: 20,
+            width: logoPosition.width,
+            height: logoPosition.height,
+            x: logoPosition.x,
+            y: logoPosition.y,
           }
         }
         
@@ -635,10 +647,10 @@ export default function CertificateGeneratorStandalone() {
           signature = {
             data: base64,
             name: signatureFile.name,
-            width: 40,
-            height: 20,
-            x: undefined,
-            y: undefined,
+            width: signaturePosition.width,
+            height: signaturePosition.height,
+            x: signaturePosition.x,
+            y: signaturePosition.y,
           }
         }
 
@@ -809,10 +821,10 @@ export default function CertificateGeneratorStandalone() {
           logo = {
             data: base64,
             name: logoFile.name,
-            width: 40,
-            height: 40,
-            x: undefined,
-            y: 20,
+            width: logoPosition.width,
+            height: logoPosition.height,
+            x: logoPosition.x,
+            y: logoPosition.y,
           }
         }
         
@@ -821,10 +833,10 @@ export default function CertificateGeneratorStandalone() {
           signature = {
             data: base64,
             name: signatureFile.name,
-            width: 40,
-            height: 20,
-            x: undefined,
-            y: undefined,
+            width: signaturePosition.width,
+            height: signaturePosition.height,
+            x: signaturePosition.x,
+            y: signaturePosition.y,
           }
         }
 
@@ -2008,300 +2020,300 @@ export default function CertificateGeneratorStandalone() {
                   </div>
                 )}
               </div>
-
-              {/* Font Style Controls */}
-              {!useCustomTemplate && (
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Settings className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Font Styles</h3>
-                  </div>
-                  <div className="space-y-4">
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
-                      <div className="border-b border-border pb-4">
-                        <Label className="text-sm font-semibold mb-2 block">Certificate Title</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label className="text-xs mb-1 block">Font Family</Label>
-                            <Select
-                              value={customFontStyles.certificateTitle?.fontFamily || getTemplate(selectedTemplate)?.fields.certificateTitle?.fontFamily || "helvetica"}
-                              onValueChange={(value: string) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  certificateTitle: { ...prev.certificateTitle, fontFamily: value },
-                                }))
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableFonts.map((font) => (
-                                  <SelectItem key={font.value} value={font.value}>
-                                    {font.label} {font.isCustom && "⭐"}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="cert-title-italic-standalone"
-                              checked={customFontStyles.certificateTitle?.italic ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.italic ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  certificateTitle: { ...prev.certificateTitle, italic: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="cert-title-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="cert-title-underline-standalone"
-                              checked={customFontStyles.certificateTitle?.underline ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.underline ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  certificateTitle: { ...prev.certificateTitle, underline: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="cert-title-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
-                      <div className="border-b border-border pb-4">
-                        <Label className="text-sm font-semibold mb-2 block">Award Message</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label className="text-xs mb-1 block">Font Family</Label>
-                            <Select
-                              value={customFontStyles.awardMessage?.fontFamily || getTemplate(selectedTemplate)?.fields.awardMessage?.fontFamily || "helvetica"}
-                              onValueChange={(value: string) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  awardMessage: { ...prev.awardMessage, fontFamily: value },
-                                }))
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableFonts.map((font) => (
-                                  <SelectItem key={font.value} value={font.value}>
-                                    {font.label} {font.isCustom && "⭐"}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="award-msg-italic-standalone"
-                              checked={customFontStyles.awardMessage?.italic ?? getTemplate(selectedTemplate)?.fields.awardMessage?.italic ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  awardMessage: { ...prev.awardMessage, italic: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="award-msg-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="award-msg-underline-standalone"
-                              checked={customFontStyles.awardMessage?.underline ?? getTemplate(selectedTemplate)?.fields.awardMessage?.underline ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  awardMessage: { ...prev.awardMessage, underline: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="award-msg-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
-                      <div className="border-b border-border pb-4">
-                        <Label className="text-sm font-semibold mb-2 block">Recipient Name</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label className="text-xs mb-1 block">Font Family</Label>
-                            <Select
-                              value={customFontStyles.recipientName?.fontFamily || getTemplate(selectedTemplate)?.fields.recipientName?.fontFamily || "helvetica"}
-                              onValueChange={(value: string) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  recipientName: { ...prev.recipientName, fontFamily: value },
-                                }))
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableFonts.map((font) => (
-                                  <SelectItem key={font.value} value={font.value}>
-                                    {font.label} {font.isCustom && "⭐"}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="recipient-name-italic-standalone"
-                              checked={customFontStyles.recipientName?.italic ?? getTemplate(selectedTemplate)?.fields.recipientName?.italic ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  recipientName: { ...prev.recipientName, italic: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="recipient-name-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="recipient-name-underline-standalone"
-                              checked={customFontStyles.recipientName?.underline ?? getTemplate(selectedTemplate)?.fields.recipientName?.underline ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  recipientName: { ...prev.recipientName, underline: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="recipient-name-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
-                      <div className="border-b border-border pb-4">
-                        <Label className="text-sm font-semibold mb-2 block">Sub Message</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label className="text-xs mb-1 block">Font Family</Label>
-                            <Select
-                              value={customFontStyles.subMessage?.fontFamily || getTemplate(selectedTemplate)?.fields.subMessage?.fontFamily || "helvetica"}
-                              onValueChange={(value: string) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  subMessage: { ...prev.subMessage, fontFamily: value },
-                                }))
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableFonts.map((font) => (
-                                  <SelectItem key={font.value} value={font.value}>
-                                    {font.label} {font.isCustom && "⭐"}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="sub-msg-italic-standalone"
-                              checked={customFontStyles.subMessage?.italic ?? getTemplate(selectedTemplate)?.fields.subMessage?.italic ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  subMessage: { ...prev.subMessage, italic: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="sub-msg-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="sub-msg-underline-standalone"
-                              checked={customFontStyles.subMessage?.underline ?? getTemplate(selectedTemplate)?.fields.subMessage?.underline ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  subMessage: { ...prev.subMessage, underline: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="sub-msg-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
-                      <div className="border-b border-border pb-4">
-                        <Label className="text-sm font-semibold mb-2 block">Course Title</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label className="text-xs mb-1 block">Font Family</Label>
-                            <Select
-                              value={customFontStyles.courseTitle?.fontFamily || getTemplate(selectedTemplate)?.fields.courseTitle?.fontFamily || "helvetica"}
-                              onValueChange={(value: string) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  courseTitle: { ...prev.courseTitle, fontFamily: value },
-                                }))
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableFonts.map((font) => (
-                                  <SelectItem key={font.value} value={font.value}>
-                                    {font.label} {font.isCustom && "⭐"}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="course-title-italic-standalone"
-                              checked={customFontStyles.courseTitle?.italic ?? getTemplate(selectedTemplate)?.fields.courseTitle?.italic ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  courseTitle: { ...prev.courseTitle, italic: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="course-title-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              id="course-title-underline-standalone"
-                              checked={customFontStyles.courseTitle?.underline ?? getTemplate(selectedTemplate)?.fields.courseTitle?.underline ?? false}
-                              onCheckedChange={(checked) => {
-                                setCustomFontStyles((prev) => ({
-                                  ...prev,
-                                  courseTitle: { ...prev.courseTitle, underline: checked === true },
-                                }))
-                              }}
-                            />
-                            <Label htmlFor="course-title-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Font Style Controls - Full Width */}
+          {!useCustomTemplate && (
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Settings className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold text-lg">Font Styles</h3>
+              </div>
+              <div className="space-y-4">
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
+                  <div className="border-b border-border pb-4">
+                    <Label className="text-sm font-semibold mb-2 block">Certificate Title</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-xs mb-1 block">Font Family</Label>
+                        <Select
+                          value={customFontStyles.certificateTitle?.fontFamily || getTemplate(selectedTemplate)?.fields.certificateTitle?.fontFamily || "helvetica"}
+                          onValueChange={(value: string) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              certificateTitle: { ...prev.certificateTitle, fontFamily: value },
+                            }))
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableFonts.map((font) => (
+                              <SelectItem key={font.value} value={font.value}>
+                                {font.label} {font.isCustom && "⭐"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="cert-title-italic-standalone"
+                          checked={customFontStyles.certificateTitle?.italic ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.italic ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              certificateTitle: { ...prev.certificateTitle, italic: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="cert-title-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="cert-title-underline-standalone"
+                          checked={customFontStyles.certificateTitle?.underline ?? getTemplate(selectedTemplate)?.fields.certificateTitle?.underline ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              certificateTitle: { ...prev.certificateTitle, underline: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="cert-title-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
+                  <div className="border-b border-border pb-4">
+                    <Label className="text-sm font-semibold mb-2 block">Award Message</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-xs mb-1 block">Font Family</Label>
+                        <Select
+                          value={customFontStyles.awardMessage?.fontFamily || getTemplate(selectedTemplate)?.fields.awardMessage?.fontFamily || "helvetica"}
+                          onValueChange={(value: string) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              awardMessage: { ...prev.awardMessage, fontFamily: value },
+                            }))
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableFonts.map((font) => (
+                              <SelectItem key={font.value} value={font.value}>
+                                {font.label} {font.isCustom && "⭐"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="award-msg-italic-standalone"
+                          checked={customFontStyles.awardMessage?.italic ?? getTemplate(selectedTemplate)?.fields.awardMessage?.italic ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              awardMessage: { ...prev.awardMessage, italic: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="award-msg-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="award-msg-underline-standalone"
+                          checked={customFontStyles.awardMessage?.underline ?? getTemplate(selectedTemplate)?.fields.awardMessage?.underline ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              awardMessage: { ...prev.awardMessage, underline: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="award-msg-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
+                  <div className="border-b border-border pb-4">
+                    <Label className="text-sm font-semibold mb-2 block">Recipient Name</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-xs mb-1 block">Font Family</Label>
+                        <Select
+                          value={customFontStyles.recipientName?.fontFamily || getTemplate(selectedTemplate)?.fields.recipientName?.fontFamily || "helvetica"}
+                          onValueChange={(value: string) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              recipientName: { ...prev.recipientName, fontFamily: value },
+                            }))
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableFonts.map((font) => (
+                              <SelectItem key={font.value} value={font.value}>
+                                {font.label} {font.isCustom && "⭐"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="recipient-name-italic-standalone"
+                          checked={customFontStyles.recipientName?.italic ?? getTemplate(selectedTemplate)?.fields.recipientName?.italic ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              recipientName: { ...prev.recipientName, italic: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="recipient-name-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="recipient-name-underline-standalone"
+                          checked={customFontStyles.recipientName?.underline ?? getTemplate(selectedTemplate)?.fields.recipientName?.underline ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              recipientName: { ...prev.recipientName, underline: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="recipient-name-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
+                  <div className="border-b border-border pb-4">
+                    <Label className="text-sm font-semibold mb-2 block">Sub Message</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-xs mb-1 block">Font Family</Label>
+                        <Select
+                          value={customFontStyles.subMessage?.fontFamily || getTemplate(selectedTemplate)?.fields.subMessage?.fontFamily || "helvetica"}
+                          onValueChange={(value: string) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              subMessage: { ...prev.subMessage, fontFamily: value },
+                            }))
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableFonts.map((font) => (
+                              <SelectItem key={font.value} value={font.value}>
+                                {font.label} {font.isCustom && "⭐"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="sub-msg-italic-standalone"
+                          checked={customFontStyles.subMessage?.italic ?? getTemplate(selectedTemplate)?.fields.subMessage?.italic ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              subMessage: { ...prev.subMessage, italic: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="sub-msg-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="sub-msg-underline-standalone"
+                          checked={customFontStyles.subMessage?.underline ?? getTemplate(selectedTemplate)?.fields.subMessage?.underline ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              subMessage: { ...prev.subMessage, underline: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="sub-msg-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
+                  <div className="border-b border-border pb-4">
+                    <Label className="text-sm font-semibold mb-2 block">Course Title</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-xs mb-1 block">Font Family</Label>
+                        <Select
+                          value={customFontStyles.courseTitle?.fontFamily || getTemplate(selectedTemplate)?.fields.courseTitle?.fontFamily || "helvetica"}
+                          onValueChange={(value: string) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              courseTitle: { ...prev.courseTitle, fontFamily: value },
+                            }))
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableFonts.map((font) => (
+                              <SelectItem key={font.value} value={font.value}>
+                                {font.label} {font.isCustom && "⭐"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="course-title-italic-standalone"
+                          checked={customFontStyles.courseTitle?.italic ?? getTemplate(selectedTemplate)?.fields.courseTitle?.italic ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              courseTitle: { ...prev.courseTitle, italic: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="course-title-italic-standalone" className="text-xs cursor-pointer">Italic</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="course-title-underline-standalone"
+                          checked={customFontStyles.courseTitle?.underline ?? getTemplate(selectedTemplate)?.fields.courseTitle?.underline ?? false}
+                          onCheckedChange={(checked) => {
+                            setCustomFontStyles((prev) => ({
+                              ...prev,
+                              courseTitle: { ...prev.courseTitle, underline: checked === true },
+                            }))
+                          }}
+                        />
+                        <Label htmlFor="course-title-underline-standalone" className="text-xs cursor-pointer">Underline</Label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Award Message & Branding - Full Width */}
           {!useCustomTemplate && (
@@ -2480,19 +2492,83 @@ export default function CertificateGeneratorStandalone() {
                         </label>
                       </div>
                     ) : (
-                      <div className="relative border border-border rounded-lg p-4">
-                        <img src={logoPreview} alt="Logo preview" className="max-h-20 mx-auto" />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2"
-                          onClick={() => {
-                            setLogoPreview(null)
-                            setLogoFile(null)
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
+                      <div className="space-y-4">
+                        <div className="relative border border-border rounded-lg p-4">
+                          <img src={logoPreview} alt="Logo preview" className="max-h-20 mx-auto" />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setLogoPreview(null)
+                              setLogoFile(null)
+                              setLogoPosition({
+                                x: undefined,
+                                y: 20,
+                                width: 40,
+                                height: 40,
+                              })
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        {/* Logo Position Controls */}
+                        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                          <h4 className="font-semibold text-sm">Logo Position & Size</h4>
+                          <p className="text-xs text-muted-foreground">
+                            Adjust logo position and size. Leave X empty to center horizontally.
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs mb-1 block">X Position (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={logoPosition.x ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value === "" ? undefined : Number.parseFloat(e.target.value)
+                                  setLogoPosition((prev) => ({ ...prev, x: value }))
+                                }}
+                                placeholder="Auto (center)"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Y Position (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={logoPosition.y}
+                                onChange={(e) => {
+                                  setLogoPosition((prev) => ({ ...prev, y: Number.parseFloat(e.target.value) || 0 }))
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Width (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={logoPosition.width}
+                                onChange={(e) => {
+                                  setLogoPosition((prev) => ({ ...prev, width: Number.parseFloat(e.target.value) || 40 }))
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Height (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={logoPosition.height}
+                                onChange={(e) => {
+                                  setLogoPosition((prev) => ({ ...prev, height: Number.parseFloat(e.target.value) || 40 }))
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -2520,19 +2596,85 @@ export default function CertificateGeneratorStandalone() {
                         </label>
                       </div>
                     ) : (
-                      <div className="relative border border-border rounded-lg p-4">
-                        <img src={signaturePreview} alt="Signature preview" className="max-h-20 mx-auto" />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2"
-                          onClick={() => {
-                            setSignaturePreview(null)
-                            setSignatureFile(null)
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
+                      <div className="space-y-4">
+                        <div className="relative border border-border rounded-lg p-4">
+                          <img src={signaturePreview} alt="Signature preview" className="max-h-20 mx-auto" />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setSignaturePreview(null)
+                              setSignatureFile(null)
+                              setSignaturePosition({
+                                x: undefined,
+                                y: undefined,
+                                width: 40,
+                                height: 20,
+                              })
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        {/* Signature Position Controls */}
+                        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                          <h4 className="font-semibold text-sm">Signature Position & Size</h4>
+                          <p className="text-xs text-muted-foreground">
+                            Adjust signature position and size. Leave X or Y empty for auto-positioning.
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs mb-1 block">X Position (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={signaturePosition.x ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value === "" ? undefined : Number.parseFloat(e.target.value)
+                                  setSignaturePosition((prev) => ({ ...prev, x: value }))
+                                }}
+                                placeholder="Auto (center)"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Y Position (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={signaturePosition.y ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value === "" ? undefined : Number.parseFloat(e.target.value)
+                                  setSignaturePosition((prev) => ({ ...prev, y: value }))
+                                }}
+                                placeholder="Auto"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Width (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={signaturePosition.width}
+                                onChange={(e) => {
+                                  setSignaturePosition((prev) => ({ ...prev, width: Number.parseFloat(e.target.value) || 40 }))
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Height (mm)</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={signaturePosition.height}
+                                onChange={(e) => {
+                                  setSignaturePosition((prev) => ({ ...prev, height: Number.parseFloat(e.target.value) || 20 }))
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

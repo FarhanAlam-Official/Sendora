@@ -106,8 +106,20 @@ export default function StepCertificateCreate() {
   const [xOffset, setXOffset] = useState(0) // Offset to compensate for jsPDF positioning differences
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoPosition, setLogoPosition] = useState({
+    x: undefined as number | undefined,
+    y: 20,
+    width: 40,
+    height: 40,
+  })
   const [signatureFile, setSignatureFile] = useState<File | null>(null)
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null)
+  const [signaturePosition, setSignaturePosition] = useState({
+    x: undefined as number | undefined,
+    y: undefined as number | undefined,
+    width: 40,
+    height: 20,
+  })
   const [defaultCertificateTitle, setDefaultCertificateTitle] = useState<string>("Certificate of Appreciation")
   const [defaultAwardMessage, setDefaultAwardMessage] = useState<string>("This certificate is awarded to")
   const [defaultSubMessage, setDefaultSubMessage] = useState<string>("for completion of the course")
@@ -419,10 +431,10 @@ export default function StepCertificateCreate() {
         logo = {
           data: base64,
           name: logoFile.name,
-          width: 40,
-          height: 40,
-          x: undefined, // Center by default
-          y: 20,
+          width: logoPosition.width,
+          height: logoPosition.height,
+          x: logoPosition.x,
+          y: logoPosition.y,
         }
       }
       
@@ -431,10 +443,10 @@ export default function StepCertificateCreate() {
         signature = {
           data: base64,
           name: signatureFile.name,
-          width: 40,
-          height: 20,
-          x: undefined, // Right side by default
-          y: undefined, // Bottom by default
+          width: signaturePosition.width,
+          height: signaturePosition.height,
+          x: signaturePosition.x,
+          y: signaturePosition.y,
         }
       }
 
@@ -1710,19 +1722,83 @@ export default function StepCertificateCreate() {
                     </label>
                   </div>
                 ) : (
-                  <div className="relative border border-border rounded-lg p-4">
-                    <img src={logoPreview} alt="Logo preview" className="max-h-20 mx-auto" />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        setLogoPreview(null)
-                        setLogoFile(null)
-                      }}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+                  <div className="space-y-4">
+                    <div className="relative border border-border rounded-lg p-4">
+                      <img src={logoPreview} alt="Logo preview" className="max-h-20 mx-auto" />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setLogoPreview(null)
+                          setLogoFile(null)
+                          setLogoPosition({
+                            x: undefined,
+                            y: 20,
+                            width: 40,
+                            height: 40,
+                          })
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Logo Position Controls */}
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-sm">Logo Position & Size</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Adjust logo position and size. Leave X empty to center horizontally.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs mb-1 block">X Position (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={logoPosition.x ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? undefined : Number.parseFloat(e.target.value)
+                              setLogoPosition((prev) => ({ ...prev, x: value }))
+                            }}
+                            placeholder="Auto (center)"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs mb-1 block">Y Position (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={logoPosition.y}
+                            onChange={(e) => {
+                              setLogoPosition((prev) => ({ ...prev, y: Number.parseFloat(e.target.value) || 0 }))
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs mb-1 block">Width (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={logoPosition.width}
+                            onChange={(e) => {
+                              setLogoPosition((prev) => ({ ...prev, width: Number.parseFloat(e.target.value) || 40 }))
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs mb-1 block">Height (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={logoPosition.height}
+                            onChange={(e) => {
+                              setLogoPosition((prev) => ({ ...prev, height: Number.parseFloat(e.target.value) || 40 }))
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1750,19 +1826,85 @@ export default function StepCertificateCreate() {
                     </label>
                   </div>
                 ) : (
-                  <div className="relative border border-border rounded-lg p-4">
-                    <img src={signaturePreview} alt="Signature preview" className="max-h-20 mx-auto" />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        setSignaturePreview(null)
-                        setSignatureFile(null)
-                      }}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+                  <div className="space-y-4">
+                    <div className="relative border border-border rounded-lg p-4">
+                      <img src={signaturePreview} alt="Signature preview" className="max-h-20 mx-auto" />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setSignaturePreview(null)
+                          setSignatureFile(null)
+                          setSignaturePosition({
+                            x: undefined,
+                            y: undefined,
+                            width: 40,
+                            height: 20,
+                          })
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Signature Position Controls */}
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-sm">Signature Position & Size</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Adjust signature position and size. Leave X or Y empty for auto-positioning.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs mb-1 block">X Position (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={signaturePosition.x ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? undefined : Number.parseFloat(e.target.value)
+                              setSignaturePosition((prev) => ({ ...prev, x: value }))
+                            }}
+                            placeholder="Auto (center)"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs mb-1 block">Y Position (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={signaturePosition.y ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? undefined : Number.parseFloat(e.target.value)
+                              setSignaturePosition((prev) => ({ ...prev, y: value }))
+                            }}
+                            placeholder="Auto"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs mb-1 block">Width (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={signaturePosition.width}
+                            onChange={(e) => {
+                              setSignaturePosition((prev) => ({ ...prev, width: Number.parseFloat(e.target.value) || 40 }))
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs mb-1 block">Height (mm)</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={signaturePosition.height}
+                            onChange={(e) => {
+                              setSignaturePosition((prev) => ({ ...prev, height: Number.parseFloat(e.target.value) || 20 }))
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
