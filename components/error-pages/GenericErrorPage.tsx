@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { showToast } from "@/components/ui/enhanced-toast"
+import { showToast } from "@/components/ui/toast"
 import { AlertTriangle, RefreshCw, Home, Copy, Bug, ChevronDown, ChevronUp, ShieldAlert } from "lucide-react"
 import { useState } from "react"
 
@@ -43,7 +43,7 @@ export default function GenericErrorPage({
 
   const handleReport = async () => {
     try {
-      const subject = encodeURIComponent("SewaBazaar Error Report")
+      const subject = encodeURIComponent("Sendora Error Report")
       const body = encodeURIComponent(
         `Please describe what you were doing when this happened.\n\n`+
         `Error Title: ${errorTitle}\n`+
@@ -51,7 +51,7 @@ export default function GenericErrorPage({
         `Digest: ${digest || "N/A"}\n`+
         `Time: ${new Date().toISOString()}\n`
       )
-      window.location.href = `mailto:support@sewabazaar.com?subject=${subject}&body=${body}`
+      window.location.href = `mailto:${process.env.NEXT_PUBLIC_ADMIN_EMAIL || "sendora.tool@gmail.com"}?subject=${subject}&body=${body}`
       showToast.info({ title: "Opening mail client" })
     } catch {
       showToast.error({ title: "Could not open mail client" })

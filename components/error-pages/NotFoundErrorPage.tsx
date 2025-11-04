@@ -64,9 +64,9 @@ export default function NotFound() {
               Go back
             </Button>
             <Button asChild variant="ghost" size="lg" className="group col-span-2">
-              <Link href="/services">
+              <Link href="/about">
                 <Compass className="mr-2 h-4 w-4" />
-                Explore services
+                Learn more
               </Link>
             </Button>
           </motion.div>
