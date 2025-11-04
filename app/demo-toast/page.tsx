@@ -240,7 +240,7 @@ export default function ToastDemoPage() {
                       {
                         loading: 'Uploading file...',
                         success: 'File uploaded!',
-                        error: (err) => `Upload failed: ${err.message}`,
+                        error: (err:any) => `Upload failed: ${err?.message}`,
                       }
                     )
                   }}
@@ -285,6 +285,19 @@ export default function ToastDemoPage() {
                   }}
                 >
                   1 Second
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    notifications.showSuccess({
+                      title: 'Medium Toast',
+                      description: 'This stays visible for 5 seconds',
+                      duration: 5000,
+                    })
+                  }}
+                >
+                  5 Seconds (Manager)
                 </Button>
                 <Button
                   size="sm"
@@ -381,7 +394,8 @@ export default function ToastDemoPage() {
                     loading: 'Sending emails...',
                     success: (data: any) => `Successfully sent ${data?.data?.count || 10} certificates!`,
                     error: 'Failed to send emails. Check your SMTP settings.',
-                  }
+                  },
+                  { duration: 6000 }
                 )
               }}
             >
@@ -394,6 +408,7 @@ export default function ToastDemoPage() {
                 notifications.showSuccess({
                   title: 'Settings Saved',
                   description: 'Your SMTP configuration has been updated.',
+                  duration: 4000,
                 })
               }}
             >
@@ -455,20 +470,25 @@ showToast.success({
 
 notifications.showSuccess({
   title: 'File Uploaded',
-  description: 'Your file is ready'
-})`}</code>
+  description: 'Your file is ready',
+  duration: 5000
+})
+
+// String shortcut also works
+notifications.showWarning('Warning message')`}</code>
               </pre>
             </div>
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-semibold mb-2 text-sm">Promise-based toast:</h3>
               <pre className="text-xs overflow-x-auto">
-                <code>{`showToast.promise(
+                <code>{`notifications.promise(
   myPromise,
   {
     loading: 'Processing...',
     success: 'Done!',
     error: 'Failed'
-  }
+  },
+  { duration: 5000 }  // Optional duration
 )`}</code>
               </pre>
             </div>

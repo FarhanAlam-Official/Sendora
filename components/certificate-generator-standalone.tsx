@@ -788,7 +788,6 @@ export default function CertificateGeneratorStandalone() {
       notifications.showSuccess({
         title: 'Certificates generated successfully!',
         description: `Generated ${pdfFiles.length} certificate${pdfFiles.length > 1 ? 's' : ''} and downloaded as ZIP file.`,
-      }, {
         duration: 6000,
       })
     } catch (err) {
@@ -798,7 +797,6 @@ export default function CertificateGeneratorStandalone() {
       notifications.showError({
         title: 'Certificate generation failed',
         description: errorMessage,
-      }, {
         duration: 5000,
       })
     } finally {

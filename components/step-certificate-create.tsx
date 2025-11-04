@@ -584,7 +584,6 @@ export default function StepCertificateCreate() {
       notifications.showSuccess({
         title: 'Certificates generated successfully!',
         description: `Generated ${generatedCount} certificate${generatedCount > 1 ? 's' : ''} for your recipients.`,
-      }, {
         duration: 5000,
       })
     } catch (err) {
@@ -594,7 +593,6 @@ export default function StepCertificateCreate() {
       notifications.showError({
         title: 'Certificate generation failed',
         description: errorMessage,
-      }, {
         duration: 5000,
       })
     } finally {

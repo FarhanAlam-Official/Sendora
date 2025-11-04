@@ -1,114 +1,117 @@
 "use client"
 
-import { showToast as toast } from '@/components/ui/toast'
+import { showToast as toast, type ToastOptions } from '@/components/ui/toast'
 
-export interface NotificationOptions {
-  duration?: number
+// Extended interface that includes all ToastOptions
+export interface NotificationOptions extends ToastOptions {
   position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
-  style?: React.CSSProperties
-  className?: string
   icon?: string
 }
 
 class NotificationManager {
-  private defaultOptions: NotificationOptions = {
-    duration: 4000,
-    position: 'top-right',
-  }
-
-  private getOptions(options?: NotificationOptions) {
-    return { ...this.defaultOptions, ...options }
-  }
-
-  showSuccess(notification: { title?: string; description: string } | string, options?: NotificationOptions) {
-    const opts = this.getOptions(options)
-    
+  showSuccess(
+    notification: { title?: string; description?: string; duration?: number } | string
+  ) {
     if (typeof notification === 'string') {
       return toast.success({
         title: 'Success',
         description: notification,
-        duration: opts.duration,
       })
     }
     
     return toast.success({
       title: notification.title || 'Success',
       description: notification.description,
-      duration: opts.duration,
+      duration: notification.duration,
     })
   }
 
-  showError(notification: { title?: string; description: string }, options?: NotificationOptions) {
-    const opts = this.getOptions(options)
+  showError(
+    notification: { title?: string; description: string; duration?: number }
+  ) {
     return toast.error({
       title: notification.title || 'Error',
       description: notification.description,
-      duration: opts.duration,
+      duration: notification.duration,
     })
   }
 
-  showWarning(message: string, options?: NotificationOptions) {
-    const opts = this.getOptions(options)
+  showWarning(
+    notification: { title?: string; description?: string; duration?: number } | string
+  ) {
+    if (typeof notification === 'string') {
+      return toast.warning({
+        title: 'Warning',
+        description: notification,
+      })
+    }
+    
     return toast.warning({
-      title: 'Warning',
-      description: message,
-      duration: opts.duration,
+      title: notification.title || 'Warning',
+      description: notification.description,
+      duration: notification.duration,
     })
   }
 
-  showInfo(message: string, options?: NotificationOptions) {
-    const opts = this.getOptions(options)
+  showInfo(
+    notification: { title?: string; description?: string; duration?: number } | string
+  ) {
+    if (typeof notification === 'string') {
+      return toast.info({
+        title: 'Info',
+        description: notification,
+      })
+    }
+    
     return toast.info({
-      title: 'Info',
-      description: message,
-      duration: opts.duration,
+      title: notification.title || 'Info',
+      description: notification.description,
+      duration: notification.duration,
     })
   }
 
-  showLoading(message: string, options?: NotificationOptions) {
-    const opts = this.getOptions(options)
+  showLoading(
+    notification: { title?: string; description?: string; duration?: number } | string
+  ) {
+    if (typeof notification === 'string') {
+      return toast.info({
+        title: 'Loading',
+        description: notification,
+      })
+    }
+    
     return toast.info({
-      title: 'Loading',
-      description: message,
-      duration: opts.duration,
+      title: notification.title || 'Loading',
+      description: notification.description,
+      duration: notification.duration,
     })
   }
 
   showCustom(
     content: React.ReactNode, 
-    options?: NotificationOptions & { type?: 'success' | 'error' | 'warning' | 'info' }
+    options?: { type?: 'success' | 'error' | 'warning' | 'info'; duration?: number }
   ) {
-    const opts = this.getOptions(options)
-    
     // Convert content to string for title/description
     const contentStr = content?.toString() || ''
     
+    const toastOptions = {
+      title: options?.type === 'success' ? 'Success' : 
+             options?.type === 'error' ? 'Error' :
+             options?.type === 'warning' ? 'Warning' : 'Info',
+      description: contentStr,
+      duration: options?.duration,
+    }
+    
     switch (options?.type) {
       case 'success':
-        return toast.success({
-          title: 'Success',
-          description: contentStr,
-          duration: opts.duration,
-        })
+        return toast.success(toastOptions)
       case 'error':
-        return toast.error({
-          title: 'Error',
-          description: contentStr,
-          duration: opts.duration,
-        })
+        return toast.error(toastOptions)
       case 'warning':
-        return toast.warning({
-          title: 'Warning',
-          description: contentStr,
-          duration: opts.duration,
-        })
+        return toast.warning(toastOptions)
       case 'info':
       default:
-        return toast.info({
-          title: 'Info',
-          description: contentStr,
-          duration: opts.duration,
-        })
+        return toast.info(toastOptions)
     }
   }
 
@@ -123,16 +126,9 @@ class NotificationManager {
       success: string | ((data: T) => string)
       error: string | ((error: any) => string)
     },
-    options?: NotificationOptions
+    options?: { duration?: number }
   ) {
-    const opts = this.getOptions(options)
-    return toast.promise(promise, {
-      loading: messages.loading,
-      success: messages.success,
-      error: messages.error,
-    }, {
-      duration: opts.duration,
-    })
+    return toast.promise(promise, messages, options)
   }
 }
 
