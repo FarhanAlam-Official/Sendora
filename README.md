@@ -28,14 +28,14 @@ A Next.js 15-based web application for bulk certificate and email distribution w
 \`\`\`bash
 npm create shadcn-ui@latest my-sendora-app -- --skip-git
 cd my-sendora-app
-git clone https://github.com/yourusername/sendora.git .
+git clone <https://github.com/yourusername/sendora.git> .
 npm install
 \`\`\`
 
 ### Manual Installation
 
 \`\`\`bash
-git clone https://github.com/yourusername/sendora.git
+git clone <https://github.com/yourusername/sendora.git>
 cd sendora
 npm install
 npm run dev
@@ -43,17 +43,49 @@ npm run dev
 
 ## Environment Variables
 
-Create a `.env.local` file with:
+1. Copy `.env.example` to `.env.local`:
+   \`\`\`bash
+   cp .env.example .env.local
+   \`\`\`
 
-\`\`\`
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
-ADMIN_EMAIL=admin@sendora.app
-\`\`\`
+2. Fill in your environment variables in `.env.local`:
 
-For Gmail: Use an [App Password](https://support.google.com/accounts/answer/185833)
+   \`\`\`
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=<your-email@gmail.com>
+   SMTP_PASSWORD=your-app-password
+   ADMIN_EMAIL=<admin@sendora.app>
+   SMTP_SECURE=false
+   \`\`\`
+
+### Required Variables
+
+- **SMTP_HOST**: SMTP server hostname (e.g., `smtp.gmail.com`)
+- **SMTP_PORT**: SMTP server port (typically `587` for TLS or `465` for SSL)
+- **SMTP_USER**: Your email address or SMTP username
+- **SMTP_PASSWORD**: Your email password or app-specific password
+- **ADMIN_EMAIL**: Email address for receiving contact form submissions
+
+### Optional Variables
+
+- **SMTP_SECURE**: Set to `"true"` for SSL connections (port 465), `"false"` or omit for STARTTLS (port 587)
+
+### Gmail Setup
+
+For Gmail, you need to:
+
+1. Enable 2-Step Verification
+2. Generate an [App Password](https://support.google.com/accounts/answer/185833)
+3. Use the app password (not your regular password) as `SMTP_PASSWORD`
+
+### Production Deployment
+
+Set these variables in your hosting platform's environment variables section:
+
+- **Vercel**: Project Settings > Environment Variables
+- **Netlify**: Site Settings > Build & Deploy > Environment
+- **Railway**: Variables tab
 
 ## Usage
 
@@ -68,6 +100,7 @@ For Gmail: Use an [App Password](https://support.google.com/accounts/answer/1858
 ### Placeholders
 
 Use these in your email body:
+
 - `{{name}}` - Recipient name
 - `{{email}}` - Recipient email
 - `{{certificate_link}}` - Certificate URL
@@ -111,6 +144,45 @@ Use these in your email body:
 - Logs export (CSV)
 - Multi-language support
 - Dark mode improvements
+
+## SEO Implementation
+
+Sendora includes comprehensive SEO optimization out of the box:
+
+### ✅ Implemented Features
+
+- **robots.txt** - Search engine crawler instructions
+- **sitemap.xml** - Dynamic sitemap for all pages
+- **Structured Data** - JSON-LD schema markup (Organization, WebApplication, Product, HowTo)
+- **Meta Tags** - Complete SEO metadata on all pages
+- **Open Graph** - Social media sharing optimization
+- **PWA Support** - Progressive Web App manifest
+- **Security Headers** - X-Frame-Options, CSP, and more
+- **Mobile Optimization** - Mobile-first responsive design
+
+### 📚 SEO Documentation
+
+- `SEO_IMPLEMENTATION_GUIDE.md` - Complete SEO documentation
+- `SEO_QUICK_START.md` - Quick reference checklist
+- `SEO_SUMMARY.md` - Implementation summary
+
+### 🎯 Target Keywords
+
+- bulk email sender
+- certificate distribution
+- email automation
+- excel to email
+- csv email sender
+- smtp email sender
+
+### 🚀 Getting Started with SEO
+
+1. Verify ownership in [Google Search Console](https://search.google.com/search-console)
+2. Submit sitemap: `https://sendora.vercel.app/sitemap.xml`
+3. Set up [Google Analytics 4](https://analytics.google.com/)
+4. Review `SEO_QUICK_START.md` for next steps
+
+For detailed SEO information, see the SEO documentation files in the project root.
 
 ## Deployment
 
