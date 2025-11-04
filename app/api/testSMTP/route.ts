@@ -1,3 +1,48 @@
+/**
+ * @fileoverview SMTP Configuration Testing API Route
+ * @module app/api/testSMTP
+ * @description
+ * This API endpoint tests SMTP configuration by creating a transporter
+ * and verifying the connection without sending an actual email.
+ * 
+ * Features:
+ * - SMTP connection verification
+ * - Validates required SMTP fields
+ * - Tests authentication credentials
+ * - Returns detailed error messages
+ * - Used in wizard SMTP configuration step
+ * 
+ * Use Cases:
+ * - Validate SMTP settings before saving
+ * - Test custom SMTP configuration
+ * - Troubleshoot email sending issues
+ * - Pre-flight check for email campaigns
+ * - Setup wizard validation
+ * 
+ * SMTP Providers Supported:
+ * - Gmail (smtp.gmail.com:587)
+ * - Outlook (smtp-mail.outlook.com:587)
+ * - SendGrid (smtp.sendgrid.net:587)
+ * - Mailgun (smtp.mailgun.org:587)
+ * - AWS SES (email-smtp.us-east-1.amazonaws.com:587)
+ * - Custom SMTP servers
+ * 
+ * Verification Process:
+ * 1. Validates required fields (host, email, password)
+ * 2. Creates nodemailer transporter with config
+ * 3. Calls transporter.verify() to test connection
+ * 4. Returns success or detailed error message
+ * 
+ * Security:
+ * - Does not store SMTP credentials
+ * - Does not send test emails
+ * - Only validates connection
+ * - Returns sanitized error messages
+ * 
+ * @requires next/server
+ * @requires nodemailer
+ */
+
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 

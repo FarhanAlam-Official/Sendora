@@ -1,3 +1,55 @@
+/**
+ * @fileoverview Email Sending API Route with Retry Logic
+ * @module app/api/sendEmails
+ * @description
+ * This API endpoint sends individual emails with PDF certificate attachments.
+ * It supports both default and custom SMTP configurations with automatic retry logic.
+ * 
+ * Features:
+ * - Single email sending with retry mechanism
+ * - Configurable SMTP (default from env or custom from request)
+ * - PDF attachment support (base64 encoded)
+ * - Email validation with regex
+ * - Automatic retry on failure (3 attempts, 1000ms delay)
+ * - Detailed error logging
+ * - HTML email support
+ * 
+ * Retry Strategy:
+ * - MAX_RETRIES: 3 attempts total
+ * - RETRY_DELAY: 1000ms between attempts
+ * - Exponential delay could be added for production
+ * - Logs each retry attempt for debugging
+ * 
+ * SMTP Configuration:
+ * - Default: Uses environment variables (SMTP_HOST, etc.)
+ * - Custom: Accepts SMTP config in request body
+ * - Validation: Checks required SMTP fields
+ * - Flexibility: Supports various SMTP providers
+ * 
+ * PDF Attachments:
+ * - Format: Base64 encoded string
+ * - Decoding: Automatic conversion to Buffer
+ * - Filename: Customizable via request
+ * - Content-Type: application/pdf
+ * 
+ * Email Validation:
+ * - Regex pattern validation
+ * - Format: standard email format
+ * - Prevents invalid email attempts
+ * 
+ * Environment Variables (Default SMTP):
+ * - SMTP_HOST: SMTP server hostname
+ * - SMTP_PORT: SMTP server port (default: 587)
+ * - SMTP_SECURE: Use TLS/SSL (true/false)
+ * - SMTP_USER: SMTP username
+ * - SMTP_PASSWORD: SMTP password
+ * - FROM_EMAIL: Default sender email
+ * - FROM_NAME: Default sender name
+ * 
+ * @requires next/server
+ * @requires nodemailer
+ */
+
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer, { type Transporter } from "nodemailer"
 

@@ -1,15 +1,76 @@
+/**
+ * @fileoverview Contact Form API Route - Email Submission Handler
+ * @module app/api/contact
+ * @description
+ * This API endpoint handles contact form submissions by sending notification
+ * emails to both the administrator and the form submitter.
+ * 
+ * Features:
+ * - Dual email sending (admin notification + user confirmation)
+ * - HTML email templates with inline CSS
+ * - XSS protection via HTML escaping
+ * - Parallel email sending for performance
+ * - Dynamic logo URL detection
+ * - Comprehensive error handling
+ * - Professional email design with gradients
+ * 
+ * Email Flow:
+ * 1. User submits contact form
+ * 2. API validates required fields (name, email, message)
+ * 3. Sends notification to admin with contact details
+ * 4. Sends confirmation to user acknowledging receipt
+ * 5. Returns success/error response
+ * 
+ * Security Measures:
+ * - HTML escaping to prevent XSS attacks
+ * - Email format validation
+ * - Required field validation
+ * - Error message sanitization
+ * 
+ * SMTP Configuration:
+ * - Uses environment variables for SMTP settings
+ * - Fallback to default admin email
+ * - Supports both authenticated and unauthenticated SMTP
+ * 
+ * Environment Variables:
+ * - ADMIN_EMAIL: Administrator email address
+ * - SMTP_HOST: SMTP server hostname
+ * - SMTP_PORT: SMTP server port (default: 587)
+ * - SMTP_SECURE: Use TLS/SSL (true/false)
+ * - SMTP_USER: SMTP authentication username
+ * - SMTP_PASSWORD: SMTP authentication password
+ * - NEXT_PUBLIC_BASE_URL: Base URL for logo embedding
+ * 
+ * @requires next/server
+ * @requires nodemailer
+ */
+
 import { type NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 
 /**
- * Administrator email address for contact form submissions
- * Defaults to admin@sendora.app if not set in environment variables
+ * Administrator email address for contact form submissions.
+ * Defaults to admin@sendora.app if ADMIN_EMAIL env var is not set.
+ * 
+ * @constant
+ * @type {string}
  */
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@sendora.app"
 
 /**
- * Nodemailer transporter configuration for sending emails
- * Uses environment variables for SMTP configuration with fallback values
+ * Nodemailer transporter configuration for sending emails.
+ * 
+ * Uses environment variables with the following priority:
+ * - SMTP_HOST: Mail server hostname
+ * - SMTP_PORT: Mail server port (default: 587 for TLS)
+ * - SMTP_SECURE: Whether to use SSL/TLS (port 465)
+ * - SMTP_USER & SMTP_PASSWORD: Optional authentication
+ * 
+ * Configuration is flexible to support both authenticated and
+ * unauthenticated SMTP servers.
+ * 
+ * @constant
+ * @type {nodemailer.Transporter}
  */
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -26,19 +87,76 @@ const transporter = nodemailer.createTransport({
 })
 
 /**
- * POST handler for the contact form API endpoint
+ * POST Handler - Contact Form Submission
  * 
- * This endpoint processes contact form submissions by:
- * 1. Validating required fields (name, email, message)
- * 2. Sending an email notification to the administrator
- * 3. Sending a confirmation email to the submitter
- * 4. Implementing security measures like HTML escaping to prevent XSS
+ * Processes contact form submissions and sends two emails:
+ * 1. Notification email to administrator with submission details
+ * 2. Confirmation email to user acknowledging receipt
  * 
- * The function sends both emails in parallel for better performance
- * and returns appropriate success or error responses.
+ * Request Body (FormData):
+ * - name: Sender's full name (required)
+ * - email: Sender's email address (required)
+ * - message: Message content (required)
  * 
- * @param request - Next.js request object containing form data
- * @returns NextResponse with success or error status
+ * Response (Success - 200):
+ * ```json
+ * {
+ *   "success": true,
+ *   "message": "Message sent successfully"
+ * }
+ * ```
+ * 
+ * Response (Error - 400):
+ * ```json
+ * {
+ *   "error": "Missing required fields"
+ * }
+ * ```
+ * 
+ * Response (Error - 500):
+ * ```json
+ * {
+ *   "error": "Failed to send message"
+ * }
+ * ```
+ * 
+ * Email Features:
+ * - Professional HTML templates
+ * - Responsive design (mobile-friendly)
+ * - Gradient backgrounds and styling
+ * - Embedded logo (dynamic URL detection)
+ * - Escape HTML in user inputs (XSS protection)
+ * - Convert newlines to <br> tags
+ * - Quick reply button (mailto link)
+ * 
+ * Security:
+ * - All user inputs are HTML-escaped
+ * - Prevents XSS injection attacks
+ * - Validates required fields
+ * - Sanitizes error messages
+ * 
+ * Performance:
+ * - Sends both emails in parallel using Promise.all
+ * - Reduces total response time by ~50%
+ * 
+ * @function
+ * @param {NextRequest} request - Next.js request object with FormData
+ * @returns {Promise<NextResponse>} JSON response with success/error status
+ * 
+ * @example
+ * ```typescript
+ * // Frontend usage
+ * const formData = new FormData()
+ * formData.append('name', 'John Doe')
+ * formData.append('email', 'john@example.com')
+ * formData.append('message', 'Hello!')
+ * 
+ * const response = await fetch('/api/contact', {
+ *   method: 'POST',
+ *   body: formData
+ * })
+ * const data = await response.json()
+ * ```
  */
 export async function POST(request: NextRequest) {
   try {
@@ -53,8 +171,15 @@ export async function POST(request: NextRequest) {
     }
 
     /**
-     * Helper function to determine the base URL for logo embedding
-     * Tries multiple sources to find the correct origin
+     * Helper Function: Get Base URL
+     * 
+     * Determines the base URL for logo embedding by trying multiple sources:
+     * 1. Origin header (most reliable)
+     * 2. Referer header (fallback)
+     * 3. NEXT_PUBLIC_BASE_URL environment variable
+     * 4. Default production URL
+     * 
+     * @returns {string} Base URL for the application
      */
     const getBaseUrl = () => {
       // Try origin header first
@@ -81,7 +206,13 @@ export async function POST(request: NextRequest) {
     const logoUrl = `${baseUrl}/logo.png`
 
     /**
-     * Helper function to escape HTML characters to prevent XSS attacks
+     * Helper Function: Escape HTML
+     * 
+     * Escapes HTML special characters to prevent XSS attacks.
+     * Replaces: &, <, >, ", ' with HTML entities
+     * 
+     * @param {string} text - Text to escape
+     * @returns {string} Escaped text safe for HTML insertion
      */
     const escapeHtml = (text: string) => {
       return text
@@ -95,10 +226,25 @@ export async function POST(request: NextRequest) {
     // Escape user inputs for security
     const escapedName = escapeHtml(name)
     const escapedEmail = escapeHtml(email)
-    // Escape HTML first, then convert newlines to <br> tags
+    // Escape HTML first, then convert newlines to <br> tags for display
     const escapedMessage = escapeHtml(message).replace(/\n/g, "<br>")
 
-    // Send both emails in parallel for better performance
+    /**
+     * Admin Notification Email
+     * 
+     * Sends an email to the administrator with:
+     * - Contact details (name, email)
+     * - Full message content
+     * - Quick reply button
+     * - Professional HTML template
+     * 
+     * Template Features:
+     * - Gradient header with logo
+     * - Card-based layout for contact details
+     * - Highlighted message section
+     * - Quick reply mailto button
+     * - Responsive design
+     */
     const adminEmailPromise = transporter.sendMail({
       from: ADMIN_EMAIL,
       to: ADMIN_EMAIL,
@@ -196,6 +342,23 @@ ${escapedMessage}
       `,
     })
 
+    /**
+     * User Confirmation Email
+     * 
+     * Sends a confirmation email to the user with:
+     * - Thank you message
+     * - Copy of their message (truncated preview)
+     * - Expected response time (24 hours)
+     * - What happens next section
+     * - Contact support information
+     * 
+     * Template Features:
+     * - Friendly tone ("Hi {name}! 👋")
+     * - Message preview (first 150 characters)
+     * - Timeline expectations
+     * - Alternative contact methods
+     * - Professional branding
+     */
     const confirmationEmailPromise = transporter.sendMail({
       from: ADMIN_EMAIL,
       to: email,
@@ -295,7 +458,8 @@ ${escapedMessage}
       `,
     })
 
-    // Wait for both emails to be sent
+    // Wait for both emails to be sent in parallel
+    // This is faster than sending sequentially
     await Promise.all([adminEmailPromise, confirmationEmailPromise])
 
     return NextResponse.json({
