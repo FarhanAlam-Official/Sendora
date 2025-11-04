@@ -1,3 +1,70 @@
+/**
+ * @fileoverview Structured Data (Schema.org) Configuration
+ * 
+ * This module provides comprehensive Schema.org structured data (JSON-LD) for
+ * the Sendora application. Structured data helps search engines understand
+ * the content, purpose, and features of the application, improving SEO and
+ * enabling rich search results.
+ * 
+ * **Key Benefits:**
+ * - Enhanced search engine visibility
+ * - Rich snippets in search results (ratings, pricing, breadcrumbs)
+ * - Better understanding by search crawlers
+ * - Improved semantic web integration
+ * - Voice search optimization
+ * - Knowledge graph eligibility
+ * 
+ * **Schema Types Implemented:**
+ * - Organization: Company/project information
+ * - WebSite: Website metadata and search action
+ * - WebApplication: Application features and capabilities
+ * - SoftwareApplication: Software-specific metadata
+ * - BreadcrumbList: Navigation structure
+ * - FAQPage: Frequently asked questions
+ * - HowTo: Step-by-step guides
+ * - Product: Product information with ratings
+ * 
+ * **Implementation:**
+ * Import the required schema and embed in page <head> using <script type="application/ld+json">
+ * 
+ * **SEO Impact:**
+ * - Increases click-through rates from search results
+ * - Enables special search features (sitelinks, review stars)
+ * - Improves local and voice search discoverability
+ * - Enhances brand authority and trust signals
+ * 
+ * @module lib/structured-data
+ * @see {@link https://schema.org Schema.org Documentation}
+ * @see {@link https://developers.google.com/search/docs/appearance/structured-data Google Structured Data Guide}
+ * 
+ * @author Farhan Alam
+ * @version 1.0.0
+ */
+
+/**
+ * Organization schema for Sendora
+ * 
+ * Defines the organization/project entity with founder, contact information,
+ * and social media profiles. Helps establish brand identity in search results
+ * and knowledge graphs.
+ * 
+ * **Fields:**
+ * - Organization name and URL
+ * - Logo for brand recognition
+ * - Founder information
+ * - Social media profiles (sameAs)
+ * - Contact point for customer support
+ * 
+ * **Search Benefits:**
+ * - Knowledge panel eligibility
+ * - Rich sitelinks in results
+ * - Brand entity recognition
+ * - Verified contact information display
+ * 
+ * @constant
+ * @type {Object}
+ * @public
+ */
 export const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -22,6 +89,28 @@ export const organizationSchema = {
   },
 }
 
+/**
+ * WebSite schema for Sendora
+ * 
+ * Defines the website entity with search functionality. Enables site search
+ * box in Google search results and provides metadata for the website as a whole.
+ * 
+ * **Features:**
+ * - Website name and URL
+ * - Description for search previews
+ * - SearchAction for sitelinks searchbox
+ * - URL template for internal search
+ * 
+ * **Search Benefits:**
+ * - Sitelinks searchbox in Google results
+ * - Direct search from SERP
+ * - Improved user engagement
+ * - Better understanding of site purpose
+ * 
+ * @constant
+ * @type {Object}
+ * @public
+ */
 export const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',

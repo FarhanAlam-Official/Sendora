@@ -1,6 +1,101 @@
 /**
- * Convert a File object to base64 string
+ * @fileoverview PDF Utility Functions and Intelligent Matching System
+ * 
+ * This module provides essential utilities for PDF file handling and an advanced
+ * intelligent matching algorithm that pairs recipient names with PDF files. The
+ * matching system is critical for the certificate distribution workflow, enabling
+ * automatic pairing of generated or uploaded certificates with recipients.
+ * 
+ * **Core Features:**
+ * - File to base64 conversion for PDF handling
+ * - Advanced name normalization for matching
+ * - Multi-strategy PDF matching algorithm
+ * - Fuzzy matching with Levenshtein distance
+ * - Confidence scoring for match quality
+ * - Manual review flagging for low-confidence matches
+ * 
+ * **Matching Strategies (in priority order):**
+ * 1. **Exact Match**: Normalized name exactly matches normalized filename (100% confidence)
+ * 2. **PDF Contains Name**: Filename contains the full recipient name (70-95% confidence)
+ * 3. **Name Contains PDF**: Recipient name contains the filename (50-75% confidence)
+ * 4. **Fuzzy Match**: Similarity-based matching using Levenshtein distance (configurable threshold)
+ * 
+ * **Normalization Process:**
+ * - Remove file extensions (.pdf)
+ * - Strip common prefixes (certificate, cert, diploma, etc.)
+ * - Convert to lowercase
+ * - Remove accents and diacritics
+ * - Remove special characters, spaces, hyphens, underscores
+ * - Keep only alphanumeric characters
+ * 
+ * **Matching Examples:**
+ * - "Certificate_John_Doe.pdf" → matches "John Doe"
+ * - "john-doe-certificate.pdf" → matches "John Doe"
+ * - "JohnDoe.pdf" → matches "John Doe"
+ * - "María García.pdf" → matches "Maria Garcia" (accent normalization)
+ * - "Jon Doe.pdf" → fuzzy matches "John Doe" (typo tolerance)
+ * 
+ * **Use Cases:**
+ * - Auto-matching uploaded PDFs with recipient list
+ * - Pairing generated certificates with email recipients
+ * - Validating PDF naming conventions
+ * - Identifying naming inconsistencies
+ * 
+ * **Performance Considerations:**
+ * - O(n) complexity for basic matching
+ * - O(n*m) for fuzzy matching (m = string length)
+ * - Optimized with early returns and caching strategies
+ * - Minimum length thresholds prevent false positives
+ * 
+ * @module lib/pdf-utils
+ * 
+ * @author Farhan Alam
+ * @version 3.0.0
  */
+
+/**
+ * Converts a File object to base64 string
+ * 
+ * This utility function reads a File object and converts it to a base64 encoded
+ * string, suitable for storage, transmission, or embedding in data URLs.
+ * The function strips the data URL prefix, returning only the base64 content.
+ * 
+ * **Conversion Process:**
+ * 1. Read file using FileReader API
+ * 2. Convert to data URL format
+ * 3. Extract base64 content (remove "data:*;base64," prefix)
+ * 4. Return clean base64 string
+ * 
+ * **Use Cases:**
+ * - Storing PDFs in localStorage or databases
+ * - Preparing files for API transmission
+ * - Embedding files in JSON payloads
+ * - Converting for jsPDF image/PDF embedding
+ * 
+ * @param {File} file - The file to convert (typically PDF, but works with any file type)
+ * @returns {Promise<string>} Base64 encoded file content (without data URL prefix)
+ * 
+ * @example
+ * // Convert uploaded PDF to base64
+ * const fileInput = document.querySelector('input[type="file"]')
+ * const file = fileInput.files[0]
+ * const base64 = await fileToBase64(file)
+ * console.log(`File size: ${base64.length} characters`)
+ * 
+ * @example
+ * // Use in certificate upload
+ * async function handlePDFUpload(file: File) {
+ *   const base64Data = await fileToBase64(file)
+ *   await saveCertificate({
+ *     name: file.name,
+ *     data: base64Data,
+ *     size: file.size
+ *   })
+ * }
+ * 
+ * @throws {Error} If file reading fails
+ * @public
+ **/
 export async function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -16,10 +111,52 @@ export async function fileToBase64(file: File): Promise<string> {
 }
 
 /**
- * Normalize a name for matching purposes
- * Removes separators, special characters, accents, and normalizes for comparison
- * @param name - The name to normalize
- * @returns Normalized name ready for matching (lowercase, no separators/special chars)
+ * Normalizes a name string for robust matching
+ * 
+ * This is the core normalization function that standardizes names for comparison.
+ * It removes all formatting differences, special characters, accents, and separators
+ * to enable reliable matching regardless of input format variations.
+ * 
+ * **Normalization Steps:**
+ * 1. Convert to lowercase (case-insensitive matching)
+ * 2. Apply Unicode NFD normalization (decompose accented characters)
+ * 3. Remove accent marks (U+0300 to U+036F range)
+ * 4. Remove separators (underscores, spaces, hyphens)
+ * 5. Remove all non-alphanumeric characters
+ * 6. Trim whitespace
+ * 
+ * **Character Handling:**
+ * - Accents: é → e, ñ → n, ü → u
+ * - Separators: All converted to "" (removed)
+ * - Special chars: Completely removed
+ * - Numbers: Preserved
+ * 
+ * **Use Cases:**
+ * - Comparing recipient names with filenames
+ * - Matching across different naming conventions
+ * - Handling international names with accents
+ * - Fuzzy matching preparation
+ * 
+ * @param {string} name - The name string to normalize
+ * @returns {string} Normalized name (lowercase, alphanumeric only)
+ * 
+ * @example
+ * normalizeNameForMatching("John Doe")
+ * // => "johndoe"
+ * 
+ * @example
+ * normalizeNameForMatching("María García-López")
+ * // => "mariagarcialopez"
+ * 
+ * @example
+ * normalizeNameForMatching("O'Neil-Smith Jr.")
+ * // => "oneilsmithjr"
+ * 
+ * @example
+ * normalizeNameForMatching("Jean-François Côté")
+ * // => "jeanfrancoiscote"
+ * 
+ * @public
  */
 export function normalizeNameForMatching(name: string): string {
   if (!name || typeof name !== "string") return ""
