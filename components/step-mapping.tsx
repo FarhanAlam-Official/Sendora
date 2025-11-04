@@ -1,3 +1,38 @@
+/**
+ * @fileoverview Step Mapping Component - Field Mapping and Recipient Management
+ * @module components/step-mapping
+ * @description
+ * This component implements Step 4 of the email sending wizard, handling:
+ * - Mapping of uploaded file columns to email fields (email, name, certificate link, custom message)
+ * - Recipient data preview and editing
+ * - Row-level skip/unskip functionality
+ * - Inline editing of recipient data
+ * - Real-time validation of mapping completeness
+ * - Active/skipped recipient statistics
+ * 
+ * Features:
+ * - 4 field mappings: Email (required), Name, Certificate Link, Custom Message (all optional)
+ * - Interactive data table with inline editing
+ * - Skip/unskip recipients with checkbox
+ * - Row editing with save/cancel actions
+ * - Visual confirmation when mapping is complete
+ * - Real-time recipient count statistics
+ * - Responsive table layout with horizontal scroll
+ * 
+ * Validation:
+ * - Email field mapping is mandatory to proceed
+ * - Other fields are optional but recommended for personalization
+ * - Skipped rows are excluded from email sending
+ * 
+ * @requires react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/select
+ * @requires ./send-wizard-context
+ * @requires @/components/ui/input
+ * @requires @/components/ui/checkbox
+ * @requires lucide-react
+ */
+
 "use client"
 
 import { useState } from "react"
@@ -8,6 +43,56 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { AlertCircle, Edit2 } from "lucide-react"
 
+/**
+ * Step Mapping Component - Field mapping and recipient data management.
+ * 
+ * This component provides an interface for:
+ * - Mapping file columns to email template fields
+ * - Reviewing and editing recipient data
+ * - Managing which recipients will receive emails
+ * 
+ * Layout Structure:
+ * - Top Section: Field mapping selectors (4 fields)
+ * - Middle Section: Recipient statistics overview
+ * - Bottom Section: Interactive data table with edit/skip controls
+ * 
+ * Field Mapping:
+ * - Email Field: Required for sending (validated before proceeding)
+ * - Name Field: Optional, used for {{name}} placeholder and PDF matching
+ * - Certificate Link: Optional, used for {{certificate_link}} placeholder
+ * - Custom Message: Optional, per-recipient message customization
+ * 
+ * Data Table Features:
+ * - Skip Checkbox: Exclude recipient from send (unchecks to include)
+ * - Email Column: Always displayed, shows mapped email field
+ * - Name Column: Conditional display based on mapping
+ * - Certificate Column: Conditional display based on mapping
+ * - Actions Column: Edit button for inline row editing
+ * 
+ * Inline Editing:
+ * - Click Edit icon to enable editing mode for a row
+ * - Modify email and/or name fields inline
+ * - Save changes to update row data (persisted in context)
+ * - Cancel to discard changes and restore original values
+ * 
+ * State Management:
+ * - Local: editingRow (current row being edited), editValues (temporary edit state)
+ * - Context: mapping (field mappings), rowEdits (permanent row changes), skippedRows
+ * 
+ * Recipient Statistics:
+ * - Total: All rows in uploaded file
+ * - Active: Rows not skipped (will receive emails)
+ * - Skipped: Rows excluded from sending
+ * 
+ * @component
+ * @returns {JSX.Element} Field mapping interface with recipient table and editing
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepMapping /> // Shows when currentStep === 4
+ * </SendWizardProvider>
+ */
 export default function StepMapping() {
   const { state, setMapping, setStep, updateRowEdit, skipRow, unskipRow } = useSendWizard()
   const [editingRow, setEditingRow] = useState<number | null>(null)
@@ -182,7 +267,12 @@ export default function StepMapping() {
                       {isEditing ? (
                         <Input
                           value={editValues[state.mapping.name] || ""}
-                          onChange={(e) => setEditValues({ ...editValues, [state.mapping.name]: e.target.value })}
+                          onChange={(e) => {
+                            const nameField = state.mapping.name
+                            if (nameField) {
+                              setEditValues({ ...editValues, [nameField]: e.target.value })
+                            }
+                          }}
                           className="h-8"
                         />
                       ) : (

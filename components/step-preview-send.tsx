@@ -1,3 +1,38 @@
+/**
+ * @fileoverview Step Preview Send Component - Email Preview and Sending Execution
+ * @module components/step-preview-send
+ * @description
+ * This component implements the final preview and sending step of the wizard:
+ * - Email preview with recipient selection (similar to StepPreview)
+ * - Actual email sending functionality with progress tracking
+ * - Send result persistence to prevent duplicate sends
+ * - Real-time statistics (sent, failed, progress percentage)
+ * - Result persistence across page refreshes using localStorage
+ * - Automatic navigation to summary after completion
+ * 
+ * Features:
+ * - Combined preview + send functionality
+ * - Prevention of duplicate sends via localStorage flag
+ * - Progress tracking with animated statistics
+ * - Sequential email sending with 1-second delays
+ * - PDF attachment support
+ * - Error handling with detailed failure messages
+ * - Toast notifications for send status
+ * - Results persistence for summary view
+ * 
+ * Security:
+ * - SEND_COMPLETED_KEY flag prevents accidental re-sends
+ * - SMTP credentials loaded from localStorage
+ * - Server-side email validation via /api/sendEmails
+ * 
+ * @requires react
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires ./send-wizard-context
+ * @requires @/lib/notifications
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -7,8 +42,61 @@ import { Button } from "@/components/ui/button"
 import { useSendWizard } from "./send-wizard-context"
 import { notifications } from "@/lib/notifications"
 
+/**
+ * LocalStorage key for tracking send completion status.
+ * Prevents duplicate sends across page refreshes.
+ * 
+ * @constant
+ * @type {string}
+ */
 const SEND_COMPLETED_KEY = "sendora_send_completed"
 
+/**
+ * Step Preview Send Component - Email preview and sending execution.
+ * 
+ * This component handles the final preview and actual email sending:
+ * - Displays recipient list and email previews (left/right panels)
+ * - Executes email sending with progress tracking
+ * - Prevents duplicate sends using localStorage persistence
+ * - Shows real-time statistics during sending
+ * - Persists results for summary view
+ * 
+ * Component States:
+ * - Preview Mode: Shows recipient list and email preview
+ * - Sending Mode: Displays progress stats and percentage
+ * - Completed Mode: Shows final statistics and completion message
+ * 
+ * Send Flow:
+ * 1. Check localStorage for existing send completion
+ * 2. Prepare email payloads with placeholder substitution
+ * 3. Convert PDF files from base64 for attachments
+ * 4. Send emails sequentially via /api/sendEmails
+ * 5. Track progress (sent, failed counts)
+ * 6. Add 1-second delay between emails
+ * 7. Save results to localStorage
+ * 8. Set completion flag
+ * 9. Show toast notifications
+ * 
+ * Placeholder Substitution:
+ * - {{name}} / {{recipient_name}} → Recipient name
+ * - {{certificate_link}} → Certificate URL (if enabled)
+ * - Plain text converted to HTML (<br> for newlines)
+ * 
+ * Error Handling:
+ * - Individual email failures tracked separately
+ * - Network errors caught and reported
+ * - Detailed error messages saved to results
+ * - Toast notifications for all states
+ * 
+ * @component
+ * @returns {JSX.Element} Email preview with sending functionality and progress tracking
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepPreviewSend /> // Shows when currentStep === 5
+ * </SendWizardProvider>
+ */
 export default function StepPreviewSend() {
   const { state, setStep, setSendResults, reset } = useSendWizard()
   const [selectedIdx, setSelectedIdx] = useState(0)

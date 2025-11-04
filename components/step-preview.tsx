@@ -1,3 +1,30 @@
+/**
+ * @fileoverview Step Preview Component - Email Preview Before Sending
+ * @module components/step-preview
+ * @description
+ * This component implements a preview step in the email sending wizard, allowing users to:
+ * - Review personalized emails before sending
+ * - Click through different recipients to see individualized content
+ * - Verify placeholder substitution (name, email, certificate_link)
+ * - Check PDF attachment associations
+ * - View estimated sending time with rate limiting notice
+ * 
+ * Features:
+ * - Dual-panel layout: recipient list (left) + email preview (right)
+ * - Interactive recipient selection with hover effects
+ * - Live placeholder replacement for selected recipient
+ * - PDF attachment indicator per recipient
+ * - Warning for recipients without PDF matches
+ * - Estimated sending time calculation (1s delay per email)
+ * - Responsive design with grid layout
+ * 
+ * @requires react
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires ./send-wizard-context
+ */
+
 "use client"
 
 import { useState } from "react"
@@ -6,6 +33,41 @@ import { Mail, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSendWizard } from "./send-wizard-context"
 
+/**
+ * Step Preview Component - Email preview and confirmation wizard step.
+ * 
+ * This component provides a final review interface before sending emails:
+ * - Left Panel: Scrollable list of all active recipients
+ * - Right Panel: Email preview with actual recipient data
+ * - Bottom Section: Estimated sending time notice
+ * 
+ * Preview Features:
+ * - Click any recipient to preview their personalized email
+ * - Subject and body with placeholder substitution
+ * - Visual indication of PDF attachment presence
+ * - Warning alerts for missing PDF matches
+ * - Gradient highlighting for selected recipient
+ * 
+ * Data Substitution:
+ * - {{name}} → Recipient's name from mapping
+ * - {{recipient_name}} → Alternative name placeholder
+ * - {{certificate_link}} → Certificate URL if mapped
+ * - Email metadata (To, Subject) displayed in preview header
+ * 
+ * Rate Limiting Notice:
+ * - Displays 1-second delay information
+ * - Calculates estimated total time (recipients × 1.2s)
+ * - Prevents email provider rate limiting
+ * 
+ * @component
+ * @returns {JSX.Element} Email preview interface with recipient navigation
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepPreview /> // Shows when currentStep === 7 (legacy step)
+ * </SendWizardProvider>
+ */
 export default function StepPreview() {
   const { state, setStep } = useSendWizard()
   const [selectedIdx, setSelectedIdx] = useState(0)
@@ -138,7 +200,7 @@ export default function StepPreview() {
           Back
         </Button>
         <Button
-          onClick={() => setStep(8)}
+          onClick={() => setStep(6)}
           className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
         >
           Send Now

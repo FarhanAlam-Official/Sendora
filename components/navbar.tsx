@@ -1,3 +1,57 @@
+/**
+ * @fileoverview Primary Navigation Bar Component
+ * 
+ * This component provides the main navigation interface for the Sendora application,
+ * featuring a responsive design with desktop and mobile layouts, smooth animations,
+ * and advanced interactivity using Framer Motion.
+ * 
+ * **Key Features:**
+ * - Responsive design (mobile hamburger menu, desktop horizontal nav)
+ * - Scroll-based backdrop blur and shadow effects
+ * - Active route highlighting with smooth transitions
+ * - Animated mobile menu with staggered item animations
+ * - Logo with hover animations
+ * - Call-to-action button with gradient effects
+ * - Automatic mobile menu closure on route change
+ * 
+ * **Navigation Structure:**
+ * - Home: Landing page
+ * - Generate Certificates: Certificate generation tool
+ * - How It Works: Feature explanation
+ * - About: Company information
+ * - Contact: Contact form
+ * - Get Started (CTA): Quick access to main feature
+ * 
+ * **Animation Features:**
+ * - Initial slide-down animation on page load
+ * - Smooth active indicator movement between nav items
+ * - Hover effects with background color transitions
+ * - Logo shake animation on hover
+ * - Mobile menu height animation with opacity fade
+ * - Staggered mobile menu item appearance
+ * 
+ * **Responsive Behavior:**
+ * - Desktop (≥768px): Horizontal navigation with CTA button
+ * - Mobile (<768px): Hamburger menu with slide-down panel
+ * - Tablet: Adapts based on breakpoint
+ * 
+ * **Performance Optimizations:**
+ * - Image priority loading for logo
+ * - Event listener cleanup on unmount
+ * - Conditional animation rendering
+ * - Efficient re-render with proper dependency arrays
+ * 
+ * @module components/navbar
+ * @requires next/link - Next.js navigation
+ * @requires next/image - Optimized image component
+ * @requires next/navigation - usePathname hook
+ * @requires framer-motion - Animation library
+ * @requires lucide-react - Icon components
+ * 
+ * @author Farhan Alam
+ * @version 2.0.0
+ */
+
 "use client"
 
 import Link from "next/link"
@@ -7,11 +61,29 @@ import { usePathname } from "next/navigation"
 import { Menu, X, Sparkles } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
+/**
+ * Navigation link interface
+ * 
+ * Defines the structure for navigation menu items.
+ * 
+ * @interface NavLink
+ * @property {string} href - URL path for the link
+ * @property {string} label - Display text for the link
+ */
 interface NavLink {
   href: string
   label: string
 }
 
+/**
+ * Navigation links configuration
+ * 
+ * Defines all navigation menu items in the desired order.
+ * Modify this array to add, remove, or reorder navigation items.
+ * 
+ * @constant {NavLink[]}
+ * @private
+ */
 const navLinks: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/certificates", label: "Generate Certificates" },
@@ -20,11 +92,58 @@ const navLinks: NavLink[] = [
   { href: "/contact", label: "Contact" },
 ]
 
+/**
+ * Primary Navigation Bar Component
+ * 
+ * Renders the main navigation bar with responsive design, smooth animations,
+ * and interactive elements. Handles both desktop and mobile navigation patterns.
+ * 
+ * **State Management:**
+ * - `isOpen`: Controls mobile menu visibility
+ * - `scrolled`: Tracks scroll position for backdrop effects
+ * 
+ * **Effects:**
+ * - Scroll listener for backdrop blur animation
+ * - Route change listener for mobile menu auto-close
+ * - Cleanup on component unmount
+ * 
+ * **Accessibility:**
+ * - Semantic HTML (nav element)
+ * - ARIA labels for icon buttons
+ * - Keyboard navigation support
+ * - Focus management
+ * 
+ * **Layout Breakpoints:**
+ * - Mobile: <768px (hamburger menu)
+ * - Desktop: ≥768px (horizontal navigation)
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered navigation bar
+ * 
+ * @example
+ * // Usage in layout
+ * export default function RootLayout({ children }) {
+ *   return (
+ *     <html>
+ *       <body>
+ *         <Navbar />
+ *         <main>{children}</main>
+ *       </body>
+ *     </html>
+ *   )
+ * }
+ */
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
 
+  /**
+   * Scroll event handler for backdrop effects
+   * 
+   * Updates the `scrolled` state when user scrolls past 20px,
+   * triggering backdrop blur and shadow effects.
+   */
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -34,11 +153,26 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  /**
+   * Route change effect for mobile menu
+   * 
+   * Automatically closes the mobile menu when navigation occurs,
+   * preventing the menu from staying open on new pages.
+   */
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
+  /**
+   * Determines if a navigation link is active
+   * 
+   * Checks if the current route matches the link href. Handles special
+   * case for home page (exact match) and other pages (prefix match).
+   * 
+   * @param {string} href - The link href to check
+   * @returns {boolean} True if the link is active
+   */
   const isActive = (href: string) => {
     if (href === "/") {
       return pathname === "/"
@@ -106,7 +240,7 @@ export default function Navbar() {
                     className={`relative z-10 transition-colors ${
                       active
                         ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
+                        : "text-muted-foreground group-hover:text-indigo-500"
                     }`}
                   >
                     {link.label}
@@ -122,11 +256,13 @@ export default function Navbar() {
                     />
                   )}
                   
-                  {/* Hover background */}
-                  <motion.div
-                    className="absolute inset-0 bg-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    initial={false}
-                  />
+                  {/* Hover background - only show when not active */}
+                  {!active && (
+                    <motion.div
+                      className="absolute inset-0 bg-indigo-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      initial={false}
+                    />
+                  )}
                   
                   {/* Active background */}
                   {active && (
@@ -223,7 +359,7 @@ export default function Navbar() {
                         className={`relative flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
                           active
                             ? "text-primary bg-primary/10"
-                            : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
+                            : "text-muted-foreground hover:text-indigo-500 hover:bg-indigo-100"
                         }`}
                       >
                         {active && (

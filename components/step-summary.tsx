@@ -1,3 +1,36 @@
+/**
+ * @fileoverview Step Summary Component - Email Sending Results and Statistics
+ * @module components/step-summary
+ * @description
+ * This component implements the final summary step of the email sending wizard:
+ * - Displays comprehensive sending statistics (total, sent, failed, skipped)
+ * - Shows detailed delivery results in a table format
+ * - Provides CSV export functionality for sending logs
+ * - Offers navigation to restart wizard or return home
+ * - Uses animated stat cards with staggered transitions
+ * 
+ * Features:
+ * - 4 animated stat cards (Total, Sent, Failed, Skipped)
+ * - Detailed results table with status indicators
+ * - CSV export with timestamp for record-keeping
+ * - Multiple navigation options (Back, New Send, Home)
+ * - Framer Motion animations for visual polish
+ * - Success/failure visual indicators (CheckCircle/AlertCircle)
+ * 
+ * Data Display:
+ * - Total Recipients: Count of all emails attempted
+ * - Successfully Sent: Emails delivered without errors
+ * - Failed: Emails that encountered sending errors
+ * - Skipped: Recipients excluded during wizard setup
+ * 
+ * @requires react
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires ./send-wizard-context
+ * @requires next/link
+ */
+
 "use client"
 
 import { motion } from "framer-motion"
@@ -6,6 +39,49 @@ import { Button } from "@/components/ui/button"
 import { useSendWizard } from "./send-wizard-context"
 import Link from "next/link"
 
+/**
+ * Step Summary Component - Final wizard step displaying send results.
+ * 
+ * This component presents the final results of the email sending operation:
+ * - Statistics overview with color-coded cards
+ * - Detailed table of individual recipient results
+ * - Export functionality for audit logs
+ * - Navigation options for next actions
+ * 
+ * Statistics Cards:
+ * - Blue (Primary): Total recipients processed
+ * - Green: Successfully sent emails
+ * - Red: Failed email attempts
+ * - Amber: Skipped recipients
+ * - Each card animates in with staggered timing
+ * 
+ * Results Table Columns:
+ * - Name: Recipient name from uploaded data
+ * - Email: Recipient email address
+ * - Status: Visual indicator (Sent/Failed) with icon
+ * - Message: Success confirmation or error details
+ * 
+ * Export Functionality:
+ * - Creates CSV file with all sending results
+ * - Includes timestamp in filename (sendora-logs-{timestamp}.csv)
+ * - Contains: Name, Email, Status, Message columns
+ * - Properly escapes CSV fields with quotes
+ * 
+ * Navigation Options:
+ * - Back to Preview: Review before re-sending (disabled)
+ * - Start New Send: Resets wizard to step 1
+ * - Back to Home: Returns to main application page
+ * - Export Logs: Downloads CSV of results
+ * 
+ * @component
+ * @returns {JSX.Element} Summary interface with statistics, results table, and actions
+ * 
+ * @example
+ * // Used as final step in SendWizard
+ * <SendWizardProvider>
+ *   <StepSummary /> // Shows when currentStep === 6
+ * </SendWizardProvider>
+ */
 export default function StepSummary() {
   const { state, setStep, reset } = useSendWizard()
   const results = state.sendResults || []

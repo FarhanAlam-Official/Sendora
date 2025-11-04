@@ -1,3 +1,33 @@
+/**
+ * @fileoverview Step Upload Component - Recipient Data File Upload and Parsing
+ * @module components/step-upload
+ * @description
+ * This component implements Step 1 of the email sending wizard, handling:
+ * - Excel (.xlsx, .xls) and CSV file uploads via drag-and-drop or file browser
+ * - Automatic column detection for email and name fields
+ * - File parsing and validation using XLSX library
+ * - Data preview with recipient count and field mapping display
+ * - Error handling for invalid files or missing required columns
+ * 
+ * Features:
+ * - Drag-and-drop interface with visual feedback
+ * - Auto-detection of "Email" and "Name" columns (case-insensitive)
+ * - Mandatory validation for Email and Name columns
+ * - Support for optional Certificate Link and Custom Message columns
+ * - Preview table showing first 20 recipients
+ * - Detailed format guide in collapsible panel
+ * - Toast notifications for upload success/errors
+ * 
+ * @requires react
+ * @requires next/link
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/badge
+ * @requires ./send-wizard-context
+ * @requires xlsx
+ * @requires @/lib/notifications
+ */
+
 "use client"
 
 import type React from "react"
@@ -11,7 +41,26 @@ import { useSendWizard } from "./send-wizard-context"
 import * as XLSX from "xlsx"
 import { notifications } from "@/lib/notifications"
 
-// Auto-detect column names for name and email
+/**
+ * Auto-detects email and name columns from file headers.
+ * Uses case-insensitive pattern matching to identify standard column names.
+ * 
+ * Detection Logic:
+ * - Email: Matches "email", "e-mail", "mail" (case-insensitive)
+ * - Name: Matches "name", "full name", "fullname", or any header containing "name"
+ * 
+ * @function
+ * @param {string[]} headers - Array of column headers from the uploaded file
+ * @returns {{name?: string, email?: string}} Detected field mapping
+ * 
+ * @example
+ * autoDetectColumns(["Full Name", "Email Address", "Phone"])
+ * // Returns: { name: "Full Name", email: "Email Address" }
+ * 
+ * @example
+ * autoDetectColumns(["Recipient", "Contact"])
+ * // Returns: {} (no matches found)
+ */
 function autoDetectColumns(headers: string[]): { name?: string; email?: string } {
   const mapping: { name?: string; email?: string } = {}
 
@@ -36,6 +85,39 @@ function autoDetectColumns(headers: string[]): { name?: string; email?: string }
   return mapping
 }
 
+/**
+ * Step Upload Component - First step in the email sending wizard for file upload.
+ * 
+ * This component provides a user-friendly interface for uploading recipient data:
+ * - Prominent drag-and-drop zone with gradient styling
+ * - Automatic file parsing and validation
+ * - Column auto-detection with visual confirmation
+ * - Data preview table with first 20 rows
+ * - Expandable format guide for user reference
+ * 
+ * File Processing Flow:
+ * 1. User uploads Excel/CSV file via drag-drop or browse
+ * 2. File is parsed using XLSX library
+ * 3. Columns are auto-detected for Email and Name (mandatory)
+ * 4. Data is validated (non-empty, has required columns)
+ * 5. Mapping is set in wizard context
+ * 6. Preview is displayed for user confirmation
+ * 
+ * Validation Rules:
+ * - File must be .xlsx, .xls, or .csv format
+ * - Must contain at least one row of data
+ * - Must have an "Email" column (case-insensitive)
+ * - Must have a "Name" column (case-insensitive, for PDF matching)
+ * 
+ * @component
+ * @returns {JSX.Element} File upload interface with drag-drop, preview, and format guide
+ * 
+ * @example
+ * // Used as first step in SendWizard
+ * <SendWizardProvider>
+ *   <StepUpload /> // Shows when currentStep === 1
+ * </SendWizardProvider>
+ */
 export default function StepUpload() {
   const { state, setFile, setStep, setMapping } = useSendWizard()
   const [dragActive, setDragActive] = useState(false)
@@ -397,6 +479,20 @@ export default function StepUpload() {
   )
 }
 
+/**
+ * Represents a single row from the uploaded file.
+ * Dynamic object with column names as keys and cell values as string values.
+ * 
+ * @interface
+ * @property {string} [key] - Column name as key, cell value as string
+ * 
+ * @example
+ * const row: FileRow = {
+ *   "Name": "John Doe",
+ *   "Email": "john@example.com",
+ *   "Certificate Link": "https://example.com/cert.pdf"
+ * }
+ */
 interface FileRow {
   [key: string]: string
 }

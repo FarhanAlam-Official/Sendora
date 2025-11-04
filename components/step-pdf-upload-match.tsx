@@ -1,3 +1,46 @@
+/**
+ * @fileoverview Step PDF Upload Match Component - Combined Upload and Matching
+ * @module components/step-pdf-upload-match
+ * @description
+ * This component implements Step 2 of the modern email wizard, combining:
+ * - PDF certificate upload (drag-drop or browse)
+ * - Automatic intelligent matching with recipients
+ * - Manual match adjustment and skip functionality
+ * - Certificate creation mode toggle
+ * - Advanced settings for certificate link configuration
+ * - Real-time match confidence display
+ * 
+ * Features:
+ * - Dual mode: Upload PDFs or Create Certificates
+ * - Auto-matching using Phase 3 fuzzy algorithm
+ * - Confidence badges (High/Medium/Low)
+ * - Manual PDF assignment per recipient
+ * - Skip recipients without PDFs
+ * - Advanced settings dialog for certificate links
+ * - File validation (size, count, type)
+ * - Match preview table with first 20 recipients
+ * 
+ * Modes:
+ * - Upload Mode: Traditional PDF upload and matching
+ * - Create Mode: Generate certificates using templates (StepCertificateCreate)
+ * 
+ * @requires react
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/badge
+ * @requires @/components/ui/select
+ * @requires @/components/ui/checkbox
+ * @requires @/components/ui/dialog
+ * @requires @/components/ui/input
+ * @requires @/components/ui/label
+ * @requires @/components/ui/tabs
+ * @requires ./send-wizard-context
+ * @requires ./step-certificate-create
+ * @requires @/lib/pdf-utils
+ * @requires ./confidence-badge
+ */
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -16,9 +59,81 @@ import StepCertificateCreate from "./step-certificate-create"
 import { findBestMatchingPDFWithConfidence } from "@/lib/pdf-utils"
 import { ConfidenceBadge } from "./confidence-badge"
 
+/**
+ * Maximum file size per PDF in megabytes.
+ * @constant
+ * @type {number}
+ */
 const MAX_PDF_SIZE_MB = 20
+
+/**
+ * Maximum number of PDF files that can be uploaded.
+ * @constant
+ * @type {number}
+ */
 const MAX_PDF_COUNT = 250
 
+/**
+ * Step PDF Upload Match Component - Modern combined upload and matching step.
+ * 
+ * This component unifies PDF upload and matching into a single, streamlined step:
+ * - Mode selector (Upload PDFs vs Create Certificates)
+ * - Drag-and-drop PDF upload with validation
+ * - Automatic fuzzy matching on upload
+ * - Manual match adjustment with confidence scores
+ * - Skip functionality for recipients without PDFs
+ * - Advanced certificate link settings
+ * 
+ * Component Flow:
+ * 1. User selects mode (Upload or Create)
+ * 2. If Upload: Upload PDFs via drag-drop or browse
+ * 3. PDFs auto-match to recipients by name
+ * 4. User reviews matches with confidence badges
+ * 5. Manual adjustments or skip as needed
+ * 6. Advanced settings for certificate link behavior
+ * 7. Continue to mapping step
+ * 
+ * Auto-Matching Process:
+ * - Triggered by useEffect when PDFs are uploaded
+ * - Uses findBestMatchingPDFWithConfidence algorithm
+ * - Matches based on recipient name field
+ * - Stores confidence scores and match types
+ * - Updates wizard context with PDF matches
+ * - Displays success/warning alerts
+ * 
+ * Confidence Display:
+ * - High (Green): >= 80% confidence
+ * - Medium (Yellow): >= 60% confidence
+ * - Low (Red): < 60% confidence, needs review
+ * - Badge shows match type (exact, fuzzy, partial, token)
+ * 
+ * Manual Matching:
+ * - Dropdown per recipient to select PDF
+ * - "No PDF" option to clear match
+ * - Unskips recipient when PDF is assigned
+ * - Removes match when skipped
+ * 
+ * Skip Functionality:
+ * - Checkbox per recipient to skip
+ * - Automatically removes PDF match when skipped
+ * - Updates skippedRows in wizard context
+ * - Excluded from email sending
+ * 
+ * Advanced Settings:
+ * - Certificate link field mapping
+ * - Enable/disable certificate link placeholder
+ * - Toggle embedding vs linking
+ * - Persisted across wizard navigation
+ * 
+ * @component
+ * @returns {JSX.Element} Combined upload/match interface with mode toggle
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepPdfUploadMatch /> // Shows when currentStep === 2
+ * </SendWizardProvider>
+ */
 export default function StepPdfUploadMatch() {
   const { state, setStep, setPdfFiles, setPdfMatch, removePdfMatch, skipRow, unskipRow, setMapping, setCertificateLinkEnabled, setCertificateMode } = useSendWizard()
   const [pdfs, setPdfs] = useState<File[]>([])

@@ -1,3 +1,39 @@
+/**
+ * @fileoverview Step PDF Match Component - Intelligent PDF-to-Recipient Matching
+ * @module components/step-pdf-match
+ * @description
+ * This component implements automatic and manual PDF matching for the email wizard:
+ * - Auto-matches PDFs to recipients using intelligent fuzzy matching algorithms
+ * - Displays confidence scores for each match (High/Medium/Low)
+ * - Allows manual override for low-confidence or incorrect matches
+ * - Converts base64 PDF data to File objects for matching
+ * - Shows visual indicators for match quality
+ * 
+ * Features:
+ * - Automatic matching on component mount using Phase 3 matching algorithm
+ * - Confidence-based match quality indicators (High/Medium/Low badges)
+ * - Manual PDF selection dropdown for each recipient
+ * - Visual feedback for auto-matched recipients
+ * - Warning alerts for low-confidence matches needing review
+ * - Staggered animations for smooth UI transitions
+ * 
+ * Matching Algorithm:
+ * - Uses findBestMatchingPDFWithConfidence from pdf-utils
+ * - Converts base64 PdfFile data to File objects for matching
+ * - Matches based on recipient name field
+ * - Returns confidence score (0-1), needsReview flag, and matchType
+ * - Skips recipients marked as skipped
+ * 
+ * @requires react
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/select
+ * @requires ./send-wizard-context
+ * @requires @/lib/pdf-utils
+ * @requires ./confidence-badge
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -9,6 +45,57 @@ import { useSendWizard } from "./send-wizard-context"
 import { findBestMatchingPDFWithConfidence } from "@/lib/pdf-utils"
 import { ConfidenceBadge } from "./confidence-badge"
 
+/**
+ * Step PDF Match Component - Automatic and manual PDF matching wizard step.
+ * 
+ * This component handles the intelligent matching of uploaded PDF certificates
+ * to recipients based on their names:
+ * - Auto-matches PDFs using fuzzy name matching on mount
+ * - Displays confidence scores for each match
+ * - Allows manual correction of matches
+ * - Provides visual feedback for match quality
+ * 
+ * Auto-Matching Process:
+ * 1. Converts base64 PdfFile data to File objects
+ * 2. Iterates through active recipients (non-skipped)
+ * 3. Extracts recipient name from mapped name field
+ * 4. Calls findBestMatchingPDFWithConfidence for each recipient
+ * 5. Stores match results with confidence metrics
+ * 6. Updates context with PDF matches
+ * 
+ * Confidence Levels:
+ * - High (Green): Exact or very close match (confidence >= 0.8)
+ * - Medium (Yellow): Decent match (confidence >= 0.6)
+ * - Low (Red): Poor match, needs review (confidence < 0.6)
+ * 
+ * Match Types:
+ * - exact: Exact filename match
+ * - fuzzy: Levenshtein distance-based match
+ * - partial: Substring match
+ * - token: Token-based match
+ * 
+ * User Interface:
+ * - Success Alert: Shows count of auto-matched recipients
+ * - Review Alert: Warns about low-confidence matches
+ * - Unmatched Alert: Shows count of recipients needing manual matching
+ * - Recipient Cards: Animated cards with name, email, PDF selector
+ * - Confidence Badges: Visual indicators of match quality
+ * 
+ * Manual Matching:
+ * - Dropdown selector for each recipient
+ * - "No PDF" option to clear a match
+ * - Updates both local state and wizard context
+ * - Immediate visual feedback with checkmark icon
+ * 
+ * @component
+ * @returns {JSX.Element} PDF matching interface with auto-match and manual controls
+ * 
+ * @example
+ * // Used within SendWizard flow after PDF upload
+ * <SendWizardProvider>
+ *   <StepPdfMatch /> // Shows when currentStep === 3 (legacy flow)
+ * </SendWizardProvider>
+ */
 export default function StepPdfMatch() {
   const { state, setStep, setPdfMatch, removePdfMatch } = useSendWizard()
   const [matches, setMatches] = useState<Record<number, string>>({})

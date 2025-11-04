@@ -1,3 +1,31 @@
+/**
+ * @fileoverview Step Compose Component - Email Template Selection and Composition
+ * @module components/step-compose
+ * @description
+ * This component implements Step 3 of the email sending wizard, allowing users to:
+ * - Select from pre-defined email templates or create custom templates
+ * - Compose subject lines and message bodies with placeholder support
+ * - Preview personalized emails with live data substitution
+ * - Save custom templates to localStorage for reuse
+ * - Manage certificate link placeholders based on configuration
+ * 
+ * Features:
+ * - 4 built-in email templates for common certificate scenarios
+ * - Custom template creation and persistence
+ * - Real-time email preview with recipient data
+ * - Automatic placeholder replacement ({{name}}, {{email}}, {{certificate_link}})
+ * - Certificate link management with automatic cleanup
+ * - Template highlighting and visual feedback
+ * 
+ * @requires react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/input
+ * @requires @/components/ui/textarea
+ * @requires @/components/ui/dialog
+ * @requires ./send-wizard-context
+ * @requires lucide-react
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -8,6 +36,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useSendWizard } from "./send-wizard-context"
 import { Info, Mail, Sparkles, Save, Star } from "lucide-react"
 
+/**
+ * Pre-defined email templates for common certificate distribution scenarios.
+ * Each template includes a name, subject line, and body with placeholders.
+ * 
+ * @constant
+ * @type {Array<{name: string, subject: string, body: string}>}
+ */
 const EMAIL_TEMPLATES = [
   {
     name: "Certificate Award",
@@ -65,8 +100,24 @@ The Team`,
   },
 ]
 
+/**
+ * LocalStorage key for persisting custom email templates.
+ * @constant
+ * @type {string}
+ */
 const TEMPLATE_STORAGE_KEY = "sendora_custom_templates"
 
+/**
+ * Loads custom email templates from localStorage.
+ * Returns an empty array if no templates exist or if parsing fails.
+ * 
+ * @function
+ * @returns {Array<{name: string, subject: string, body: string}>} Array of custom templates
+ * 
+ * @example
+ * const templates = loadCustomTemplates()
+ * // Returns: [{ name: "Monthly Award", subject: "...", body: "..." }]
+ */
 function loadCustomTemplates() {
   try {
     const stored = localStorage.getItem(TEMPLATE_STORAGE_KEY)
@@ -76,12 +127,57 @@ function loadCustomTemplates() {
   }
 }
 
+/**
+ * Saves a new custom email template to localStorage.
+ * Appends the template to existing custom templates.
+ * 
+ * @function
+ * @param {Object} template - The template to save
+ * @param {string} template.name - Template name/identifier
+ * @param {string} template.subject - Email subject line
+ * @param {string} template.body - Email body content
+ * 
+ * @example
+ * saveCustomTemplate({
+ *   name: "Monthly Award",
+ *   subject: "Congratulations {{name}}!",
+ *   body: "Dear {{name}},\n\nYour certificate: {{certificate_link}}"
+ * })
+ */
 function saveCustomTemplate(template: { name: string; subject: string; body: string }) {
   const templates = loadCustomTemplates()
   templates.push(template)
   localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(templates))
 }
 
+/**
+ * Step Compose Component - Email template selection and composition wizard step.
+ * 
+ * This component provides a dual-panel interface for email composition:
+ * - Left panel: Template selection, subject/body editing, template saving
+ * - Right panel: Live preview of personalized email with actual recipient data
+ * 
+ * State Management:
+ * - Manages local editing state (subject, messageBody)
+ * - Syncs with wizard context on navigation
+ * - Automatically handles certificate link placeholders
+ * 
+ * Features:
+ * - Pre-defined template selection with hover effects
+ * - Custom template creation and persistence
+ * - Real-time placeholder substitution in preview
+ * - Certificate link management based on wizard configuration
+ * - Visual indicators for selected templates
+ * 
+ * @component
+ * @returns {JSX.Element} Email composition interface with template selection and preview
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepCompose /> // Shows when currentStep === 3
+ * </SendWizardProvider>
+ */
 export default function StepCompose() {
   const { state, setComposition, setStep } = useSendWizard()
   const [subject, setSubject] = useState(state.subject || EMAIL_TEMPLATES[0].subject)

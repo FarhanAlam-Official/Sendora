@@ -1,3 +1,38 @@
+/**
+ * @fileoverview Step PDF Upload Component - PDF Certificate File Upload
+ * @module components/step-pdf-upload
+ * @description
+ * This component implements PDF certificate upload for the email wizard:
+ * - Drag-and-drop file upload interface
+ * - Multiple PDF file handling
+ * - File size and count validation
+ * - Base64 conversion for storage and transmission
+ * - Visual file list with remove functionality
+ * - Skip option for sending without PDFs
+ * 
+ * Features:
+ * - Drag-and-drop zone with visual feedback
+ * - Click-to-browse alternative
+ * - File validation (type, size, count)
+ * - Uploaded file list with remove buttons
+ * - Error handling with user-friendly messages
+ * - Gradient styling with animated effects
+ * - Skip option to proceed without PDFs
+ * 
+ * Validation Rules:
+ * - File Type: Only .pdf files allowed
+ * - Size Limit: 20MB per PDF (configurable)
+ * - Count Limit: 250 PDFs maximum (configurable)
+ * - Browser memory and email provider capacity warnings
+ * 
+ * @requires react
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/badge
+ * @requires ./send-wizard-context
+ */
+
 "use client"
 
 import { useState } from "react"
@@ -7,10 +42,72 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useSendWizard, type PdfFile } from "./send-wizard-context"
 
-// Limits (can be made configurable)
+/**
+ * Maximum file size per PDF in megabytes.
+ * @constant
+ * @type {number}
+ */
 const MAX_PDF_SIZE_MB = 20 // 20MB per PDF
+
+/**
+ * Maximum number of PDF files that can be uploaded.
+ * @constant
+ * @type {number}
+ */
 const MAX_PDF_COUNT = 250 // Maximum number of PDFs
 
+/**
+ * Step PDF Upload Component - PDF certificate upload wizard step.
+ * 
+ * This component provides a user-friendly interface for uploading PDF certificates:
+ * - Prominent drag-and-drop zone with gradient styling
+ * - File validation for type, size, and count
+ * - Base64 conversion for data storage
+ * - Uploaded file management
+ * 
+ * Upload Flow:
+ * 1. User drags PDFs or clicks to browse
+ * 2. Files are validated (type, size, count)
+ * 3. Valid files are added to local state
+ * 4. On continue, files are converted to base64
+ * 5. Base64 data stored in wizard context
+ * 6. Navigation to matching step
+ * 
+ * File Processing:
+ * - Reads file as ArrayBuffer
+ * - Converts to Uint8Array
+ * - Converts bytes to binary string
+ * - Encodes as base64 using btoa()
+ * - Stores as PdfFile object (name, blob, size)
+ * 
+ * Validation Errors:
+ * - "Only PDF files are supported" - Wrong file type
+ * - "File exceeds maximum size" - File too large
+ * - "Maximum PDF files allowed" - Too many files
+ * 
+ * User Interface:
+ * - Gradient background with decorative blur elements
+ * - Drag state visual feedback (border color, scale)
+ * - Upload icon with hover animation
+ * - File limit warnings
+ * - Uploaded file list with remove buttons
+ * - Success indicator (green checkmark)
+ * - Error alert (red with icon)
+ * 
+ * Navigation Options:
+ * - Back: Return to previous step
+ * - Skip: Proceed without PDFs
+ * - Continue: Convert and proceed to matching
+ * 
+ * @component
+ * @returns {JSX.Element} PDF upload interface with drag-drop and validation
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepPdfUpload /> // Shows when currentStep === 2 (legacy flow)
+ * </SendWizardProvider>
+ */
 export default function StepPdfUpload() {
   const { state, setStep, setPdfFiles } = useSendWizard()
   const [pdfs, setPdfs] = useState<File[]>([])
@@ -148,39 +245,38 @@ export default function StepPdfUpload() {
         </div>
       </div>
 
-        {error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2"
-          >
-            <AlertCircle className="w-5 h-5 text-red-600" />
-            <span className="text-red-600 text-sm">{error}</span>
-          </motion.div>
-        )}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2"
+        >
+          <AlertCircle className="w-5 h-5 text-red-600" />
+          <span className="text-red-600 text-sm">{error}</span>
+        </motion.div>
+      )}
 
-        {pdfs.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 text-left">
-            <div className="flex items-center gap-2 mb-4">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="font-semibold text-green-600">{pdfs.length} PDF files uploaded</span>
-            </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {pdfs.map((pdf, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <span className="text-sm truncate">{pdf.name}</span>
-                  <button
-                    onClick={() => removePdf(idx)}
-                    className="text-muted-foreground hover:text-red-600 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
+      {pdfs.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-left">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="font-semibold text-green-600">{pdfs.length} PDF files uploaded</span>
+          </div>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {pdfs.map((pdf, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm truncate">{pdf.name}</span>
+                <button
+                  onClick={() => removePdf(idx)}
+                  className="text-muted-foreground hover:text-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={() => setStep(1)}>

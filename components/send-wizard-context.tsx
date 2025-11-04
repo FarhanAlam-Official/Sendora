@@ -1,12 +1,100 @@
+/**
+ * @fileoverview Send Wizard Context and State Management
+ * 
+ * This module provides comprehensive state management for the multi-step email
+ * sending wizard using React Context. It handles all wizard state including file
+ * uploads, field mapping, email composition, PDF matching, certificate generation,
+ * and send results.
+ * 
+ * **Key Responsibilities:**
+ * - Centralized state for the entire wizard workflow
+ * - Step navigation and progression
+ * - Excel/CSV file processing and data storage
+ * - Field mapping configuration (name, email, custom fields)
+ * - Row-level editing and skipping
+ * - PDF file storage and recipient matching
+ * - Email composition (subject and body)
+ * - SMTP configuration selection
+ * - Certificate generation settings
+ * - Send results tracking
+ * 
+ * **Wizard Flow:**
+ * 1. Upload Excel → Parse and store data
+ * 2. Upload & Match PDFs → Associate PDFs with recipients
+ * 3. Compose Email → Create email content with templates
+ * 4. SMTP Config → Select email server configuration
+ * 5. Preview & Send → Review and send emails
+ * 6. Summary → Display send results and statistics
+ * 
+ * **State Structure:**
+ * - Step tracking (1-6)
+ * - File data (headers, rows, original file)
+ * - Field mapping (email, name, certificate link, custom fields)
+ * - Row management (edits, skips)
+ * - Email composition (subject, body)
+ * - PDF management (files, matches)
+ * - Certificate generation (mode, template, field mapping, config)
+ * - Results (send status per recipient)
+ * 
+ * **Certificate Modes:**
+ * - upload: User uploads pre-made PDFs
+ * - generate: System generates certificates from templates
+ * 
+ * @module components/send-wizard-context
+ * @requires react - React hooks and context
+ * @requires @/types/certificate - Certificate type definitions
+ * 
+ * @author Farhan Alam
+ * @version 2.0.0
+ */
+
 "use client"
 
 import { createContext, useContext, useState, type ReactNode } from "react"
 import type { CertificateMode, CertificateFieldMapping, CertificateConfig } from "@/types/certificate"
 
+/**
+ * File row interface representing a single recipient record
+ * 
+ * Represents a row from the uploaded Excel/CSV file with dynamic columns.
+ * Keys are column headers, values are cell contents.
+ * 
+ * @interface FileRow
+ * @example
+ * const row: FileRow = {
+ *   "Name": "John Doe",
+ *   "Email": "john@example.com",
+ *   "Course": "Web Development"
+ * }
+ */
 export interface FileRow {
   [key: string]: string
 }
 
+/**
+ * Field mapping configuration interface
+ * 
+ * Maps Excel/CSV column names to email template variables.
+ * Used for personalizing emails with recipient data.
+ * 
+ * **Standard Fields:**
+ * - name: Recipient's name (e.g., "{{name}}" in template)
+ * - email: Recipient's email address
+ * - certificateLink: Link to attached PDF certificate
+ * - customMessage: Personalized message field
+ * 
+ * **Custom Fields:**
+ * Any additional fields can be mapped using string keys.
+ * 
+ * @interface FieldMapping
+ * @example
+ * const mapping: FieldMapping = {
+ *   name: "Full Name",
+ *   email: "Email Address",
+ *   certificateLink: "Certificate URL",
+ *   course: "Course Name"
+ * }
+ */
 export interface FieldMapping {
   name?: string
   email?: string
@@ -15,12 +103,77 @@ export interface FieldMapping {
   [key: string]: string | undefined
 }
 
+/**
+ * PDF file interface for certificate storage
+ * 
+ * Represents a PDF file (certificate) stored as base64 data.
+ * Used for both uploaded PDFs and generated certificates.
+ * 
+ * @interface PdfFile
+ * @property {string} name - PDF filename
+ * @property {string} blob - Base64 encoded PDF data
+ * @property {number} size - File size in bytes
+ * 
+ * @example
+ * const pdfFile: PdfFile = {
+ *   name: "john_doe_certificate.pdf",
+ *   blob: "JVBERi0xLjQKJeLjz9MKMyAwIG9iaiA8PC...",
+ *   size: 45678
+ * }
+ */
 export interface PdfFile {
   name: string
   blob: string // base64
   size: number
 }
 
+/**
+ * Complete wizard state interface
+ * 
+ * Defines the entire state structure for the send wizard, including all
+ * data needed for the multi-step workflow.
+ * 
+ * **State Categories:**
+ * 
+ * **Navigation:**
+ * @property {(1|2|3|4|5|6)} step - Current wizard step
+ * 
+ * **File Data:**
+ * @property {File | null} file - Original uploaded Excel/CSV file
+ * @property {string[]} headers - Column headers from file
+ * @property {FileRow[]} rows - All data rows from file
+ * 
+ * **Field Configuration:**
+ * @property {FieldMapping} mapping - Column to template variable mapping
+ * @property {boolean} autoDetectedMapping - Whether mapping was auto-detected
+ * 
+ * **Row Management:**
+ * @property {Set<number>} skippedRows - Indices of rows to skip
+ * @property {Map<number, FileRow>} rowEdits - Row-level edits (index → edited row)
+ * 
+ * **Email Composition:**
+ * @property {string} subject - Email subject line
+ * @property {string} messageBody - Email body content (supports template variables)
+ * 
+ * **SMTP Configuration:**
+ * @property {("default" | "custom" | null)} smtpConfig - Selected SMTP configuration
+ * 
+ * **PDF Management:**
+ * @property {PdfFile[]} pdfFiles - All uploaded/generated PDF files
+ * @property {Map<number, string>} pdfMatches - Row index → PDF filename mapping
+ * @property {boolean} certificateLinkEnabled - Whether to include certificate links
+ * 
+ * **Certificate Generation:**
+ * @property {CertificateMode} certificateMode - "upload" or "generate"
+ * @property {string | null} certificateTemplate - Selected template ID
+ * @property {CertificateFieldMapping} certificateFieldMapping - Field mapping for certificates
+ * @property {CertificateConfig | null} certificateConfig - Complete certificate configuration
+ * 
+ * **Results:**
+ * @property {Array} sendResults - Send status for each recipient
+ * 
+ * @interface SendWizardState
+ */
 export interface SendWizardState {
   step: 1 | 2 | 3 | 4 | 5 | 6
   file: File | null

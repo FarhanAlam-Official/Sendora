@@ -1,3 +1,41 @@
+/**
+ * @fileoverview Step PDF Component - PDF Attachment and Auto-Matching (Legacy)
+ * @module components/step-pdf
+ * @description
+ * This component implements a legacy PDF attachment step in the email wizard:
+ * - PDF upload via drag-and-drop
+ * - Automatic matching with recipients using fuzzy algorithms
+ * - Manual match review and adjustment
+ * - Confidence-based match quality indicators
+ * - Option to skip PDF attachments
+ * 
+ * NOTE: This is a legacy component. The modern flow uses StepPdfUploadMatch instead.
+ * 
+ * Features:
+ * - Drag-and-drop PDF upload zone
+ * - Auto-match button for intelligent matching
+ * - Confidence badges for match quality
+ * - File list with size information
+ * - Match summary statistics
+ * - Skip option to send without PDFs
+ * 
+ * Auto-Matching:
+ * - Requires name field to be mapped
+ * - Converts base64 PdfFile data to File objects
+ * - Uses findBestMatchingPDFWithConfidence algorithm
+ * - Stores confidence metrics for each match
+ * - Shows toast notification if name field missing
+ * 
+ * @requires react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/badge
+ * @requires ./send-wizard-context
+ * @requires lucide-react
+ * @requires @/lib/pdf-utils
+ * @requires ./confidence-badge
+ * @requires @/lib/notifications
+ */
+
 "use client"
 
 import type React from "react"
@@ -11,6 +49,56 @@ import { findBestMatchingPDFWithConfidence } from "@/lib/pdf-utils"
 import { ConfidenceBadge } from "./confidence-badge"
 import { notifications } from "@/lib/notifications"
 
+/**
+ * Step PDF Component - Legacy PDF attachment wizard step.
+ * 
+ * This component provides PDF upload and matching functionality:
+ * - Upload zone for dragging/dropping PDFs
+ * - Auto-match button to trigger intelligent matching
+ * - Match results with confidence indicators
+ * - File management interface
+ * 
+ * NOTE: This is a legacy step from an older wizard flow.
+ * Modern implementations should use StepPdfUploadMatch which combines
+ * upload and matching into a single streamlined step.
+ * 
+ * Component States:
+ * - No PDFs: Shows upload zone
+ * - PDFs Uploaded: Shows file list, auto-match button, match results
+ * - Auto-Matching: Shows loading state during matching
+ * - Matched: Shows success stats and confidence warnings
+ * 
+ * Auto-Match Process:
+ * 1. Validates name field is mapped
+ * 2. Converts PdfFile base64 to File objects
+ * 3. Iterates through non-skipped recipients
+ * 4. Calls findBestMatchingPDFWithConfidence for each
+ * 5. Updates wizard context with matches
+ * 6. Stores confidence metrics locally
+ * 7. Displays match statistics
+ * 
+ * Confidence Indicators:
+ * - Badges show match quality (High/Medium/Low)
+ * - Warning alert for low-confidence matches
+ * - Count of matches needing review
+ * 
+ * User Interface:
+ * - Gradient upload zone with decorative elements
+ * - Drag state visual feedback
+ * - File list with name and size
+ * - Auto-match button (disabled while matching)
+ * - Match statistics (total, matched, confidence alerts)
+ * - Skip option for sending without PDFs
+ * 
+ * @component
+ * @returns {JSX.Element} PDF attachment interface (legacy)
+ * 
+ * @example
+ * // Legacy wizard flow (not commonly used)
+ * <SendWizardProvider>
+ *   <StepPDF /> // Shows when currentStep === 4 (old flow)
+ * </SendWizardProvider>
+ */
 export default function StepPDF() {
   const { state, setStep, setPdfFiles, setPdfMatch } = useSendWizard()
   const [dragActive, setDragActive] = useState(false)

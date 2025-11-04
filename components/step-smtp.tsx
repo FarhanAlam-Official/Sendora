@@ -1,3 +1,34 @@
+/**
+ * @fileoverview Step SMTP Component - SMTP Configuration and Testing
+ * @module components/step-smtp
+ * @description
+ * This component implements Step 5 of the email sending wizard, managing SMTP configuration:
+ * - Selection between default (server-side) and custom SMTP
+ * - Custom SMTP server configuration with connection testing
+ * - Credentials management with localStorage persistence
+ * - Real-time connection validation via API endpoint
+ * - Send summary preview with recipient statistics
+ * 
+ * Features:
+ * - Two configuration modes: Default and Custom
+ * - Custom SMTP form for Gmail, Office 365, or custom servers
+ * - Connection testing with success/failure feedback
+ * - Secure local storage for SMTP credentials
+ * - Visual feedback for selected configuration
+ * - Send summary with recipient counts
+ * 
+ * Security:
+ * - Credentials stored only in browser localStorage (never sent to server except during test)
+ * - Clear user communication about data privacy
+ * - Support for app passwords (e.g., Gmail App Passwords)
+ * 
+ * @requires react
+ * @requires @/components/ui/button
+ * @requires @/components/ui/input
+ * @requires ./send-wizard-context
+ * @requires lucide-react
+ */
+
 "use client"
 
 import { useState } from "react"
@@ -6,6 +37,42 @@ import { Input } from "@/components/ui/input"
 import { useSendWizard } from "./send-wizard-context"
 import { AlertCircle, CheckCircle2, Loader2, Lock } from "lucide-react"
 
+/**
+ * Step SMTP Component - SMTP configuration wizard step.
+ * 
+ * This component provides SMTP server configuration options:
+ * - Default SMTP: Uses server-configured email service (requires env vars)
+ * - Custom SMTP: User-provided SMTP server credentials (Gmail, Office365, etc.)
+ * 
+ * Configuration Management:
+ * - Default mode: No user input required, uses server environment
+ * - Custom mode: User enters host, port, email, password
+ * - Credentials saved to localStorage for persistence
+ * - Connection can be tested before proceeding
+ * 
+ * User Interface:
+ * - Radio-style cards for configuration selection
+ * - Conditional custom SMTP form
+ * - Test connection button with loading state
+ * - Success/error feedback for connection tests
+ * - Security notice about local storage
+ * - Send summary with recipient statistics
+ * 
+ * Custom SMTP Fields:
+ * - Host: SMTP server address (e.g., smtp.gmail.com)
+ * - Port: SMTP port (default: 587 for TLS)
+ * - Email: Sender email address
+ * - Password: Email password or app password
+ * 
+ * @component
+ * @returns {JSX.Element} SMTP configuration interface with testing capability
+ * 
+ * @example
+ * // Used within SendWizard flow
+ * <SendWizardProvider>
+ *   <StepSMTP /> // Shows when currentStep === 5
+ * </SendWizardProvider>
+ */
 export default function StepSMTP() {
   const { state, setStep, setSMTPConfig } = useSendWizard()
   const [configType, setConfigType] = useState<"default" | "custom" | null>(state.smtpConfig)

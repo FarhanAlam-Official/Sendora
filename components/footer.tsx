@@ -1,3 +1,65 @@
+/**
+ * @fileoverview Application Footer Component
+ * 
+ * This component renders the comprehensive footer section for the Sendora application,
+ * featuring organized link groups, social media connections, branding, and legal information.
+ * 
+ * **Key Features:**
+ * - Multi-column responsive grid layout (5 columns on desktop, stacked on mobile)
+ * - Animated section reveals using Framer Motion
+ * - Social media links with hover animations
+ * - Categorized navigation links (Product, Company, Resources, Legal)
+ * - Brand section with logo and tagline
+ * - Copyright and attribution information
+ * - Gradient text effects for creator attribution
+ * 
+ * **Footer Sections:**
+ * 1. **Brand Section:**
+ *    - Logo and company name
+ *    - Tagline/description
+ *    - Social media icons (Instagram, Facebook, LinkedIn, Email, GitHub)
+ * 
+ * 2. **Product Links:**
+ *    - Features, How It Works, Pricing, Security
+ * 
+ * 3. **Company Links:**
+ *    - About, Blog, Contact, Careers
+ * 
+ * 4. **Resources Links:**
+ *    - Documentation, API Docs, Templates, FAQ
+ * 
+ * 5. **Legal Links:**
+ *    - Privacy Policy, Terms of Service, Cookie Policy, Licenses
+ * 
+ * **Animation Features:**
+ * - Staggered fade-in animations for each column
+ * - Social icon hover scale and lift effects
+ * - Smooth color transitions on link hover
+ * - Viewport-triggered animations (scroll-based)
+ * 
+ * **Responsive Design:**
+ * - 5 columns on desktop
+ * - Single column stack on mobile
+ * - Adaptive spacing and padding
+ * - Center-aligned text on mobile, left-aligned on desktop
+ * 
+ * **Social Media Integration:**
+ * - Instagram: https://instagram.com/farhan.alam.01
+ * - Facebook: https://facebook.com/farhanalam930
+ * - LinkedIn: https://linkedin.com/in/farhan-alam-aa56b2309
+ * - Email: thefarhanalam01@gmail.com
+ * - GitHub: https://github.com/FarhanAlam-Official
+ * 
+ * @module components/footer
+ * @requires next/link - Next.js navigation
+ * @requires next/image - Optimized image component
+ * @requires framer-motion - Animation library
+ * @requires lucide-react - Icon components
+ * 
+ * @author Farhan Alam
+ * @version 1.0.0
+ */
+
 "use client"
 
 import Link from "next/link"
@@ -5,7 +67,61 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { Mail, Github, Linkedin, Instagram, Facebook } from "lucide-react"
 
+/**
+ * Application Footer Component
+ * 
+ * Renders the comprehensive footer with multiple link sections, social media
+ * integration, and animated reveals. Provides essential navigation and legal
+ * information while maintaining brand consistency.
+ * 
+ * **Layout Structure:**
+ * - Grid-based responsive design
+ * - 5-column layout on desktop (md breakpoint)
+ * - Single-column stack on mobile
+ * - Border-top separator with gradient background
+ * 
+ * **Animation Strategy:**
+ * - Fade-in-up animation for all sections
+ * - Staggered delays for sequential reveal
+ * - Viewport-triggered animations (once per scroll)
+ * - Hover animations on social icons and links
+ * 
+ * **Accessibility:**
+ * - Semantic HTML (footer element)
+ * - ARIA labels for social links
+ * - External link indicators (rel="noopener noreferrer")
+ * - Proper heading hierarchy
+ * 
+ * **Dynamic Elements:**
+ * - Current year auto-updates (copyright notice)
+ * - Brand gradient text effects
+ * - Responsive padding and spacing
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered footer section
+ * 
+ * @example
+ * // Usage in layout
+ * export default function RootLayout({ children }) {
+ *   return (
+ *     <html>
+ *       <body>
+ *         <Navbar />
+ *         <main>{children}</main>
+ *         <Footer />
+ *       </body>
+ *     </html>
+ *   )
+ * }
+ */
 export default function Footer() {
+  /**
+   * Base animation configuration for fade-in-up effect
+   * 
+   * Used consistently across all footer sections for uniform reveal animation.
+   * 
+   * @constant
+   */
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },

@@ -1,6 +1,60 @@
+/**
+ * @fileoverview Certificate Template Definitions - Pre-configured Certificate Layouts
+ * @module components/certificate-templates
+ * @description
+ * This module contains all built-in certificate template configurations for PDF generation.
+ * Each template defines a complete design system including layout, field positions, and styling.
+ * 
+ * Templates Included:
+ * - Classic: Traditional certificate with elegant border and seal design
+ * - Modern: Clean, minimalist design for contemporary certificates
+ * - Elegant: Formal certificate with decorative elements
+ * - Professional: Corporate-style certificate for business achievements
+ * 
+ * Each template specifies:
+ * - Page layout (orientation, size in mm)
+ * - Field positions (x, y coordinates in mm)
+ * - Font sizes and weights
+ * - Text alignment (left, center, right)
+ * - Color scheme (primary, secondary, background, border)
+ * - Border styling (color, width)
+ * 
+ * Field Types:
+ * - certificateTitle: Main title (e.g., "Certificate of Achievement")
+ * - awardMessage: Introductory text (e.g., "This certificate is proudly presented to")
+ * - recipientName: Name of the recipient (largest, bold)
+ * - subMessage: Additional context text
+ * - courseTitle: Name of course/achievement
+ * - date: Issue date
+ * - organization: Issuing organization name
+ * - signaturePosition: Position title of signatory
+ * - certificateNumber: Unique certificate ID (Professional template only)
+ * 
+ * Coordinate System:
+ * - Origin (0,0) is top-left corner
+ * - X increases from left to right
+ * - Y increases from top to bottom
+ * - Units are in millimeters (mm)
+ * - A4 landscape: 297mm × 210mm
+ * 
+ * @requires @/types/certificate
+ */
+
 import type { CertificateTemplate } from "@/types/certificate"
 
+/**
+ * Array of all available certificate templates.
+ * Each template is a complete configuration object for PDF generation.
+ * 
+ * @constant
+ * @type {CertificateTemplate[]}
+ */
 export const CERTIFICATE_TEMPLATES: CertificateTemplate[] = [
+  /**
+   * Classic Template - Traditional certificate design.
+   * Features elegant border, centered layout, and gold accents.
+   * Best for: Formal achievements, academic certificates, awards
+   */
   {
     id: "classic",
     name: "Classic",
@@ -74,6 +128,11 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplate[] = [
       borderWidth: 8,
     },
   },
+  /**
+   * Modern Template - Contemporary minimalist design.
+   * Features clean lines, blue color scheme, and thin borders.
+   * Best for: Tech courses, modern organizations, professional training
+   */
   {
     id: "modern",
     name: "Modern",
@@ -150,6 +209,11 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplate[] = [
       borderWidth: 2,
     },
   },
+  /**
+   * Elegant Template - Formal design with purple accents.
+   * Features decorative elements and sophisticated color palette.
+   * Best for: Completion certificates, workshops, seminars
+   */
   {
     id: "elegant",
     name: "Elegant",
@@ -227,6 +291,11 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplate[] = [
       borderWidth: 4,
     },
   },
+  /**
+   * Professional Template - Corporate business design.
+   * Features dark color scheme, subtle borders, and certificate numbering.
+   * Best for: Corporate training, business certifications, professional development
+   */
   {
     id: "professional",
     name: "Professional",
@@ -313,6 +382,24 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplate[] = [
   },
 ]
 
+/**
+ * Retrieves a specific certificate template by its unique ID.
+ * 
+ * This helper function searches the CERTIFICATE_TEMPLATES array for a template
+ * matching the provided ID and returns it if found.
+ * 
+ * @function
+ * @param {string} id - The unique identifier of the template to retrieve
+ * @returns {CertificateTemplate | undefined} The matching template or undefined if not found
+ * 
+ * @example
+ * ```typescript
+ * const classicTemplate = getTemplate('classic')
+ * if (classicTemplate) {
+ *   generateCertificate(data, classicTemplate)
+ * }
+ * ```
+ */
 export function getTemplate(id: string): CertificateTemplate | undefined {
   return CERTIFICATE_TEMPLATES.find((t) => t.id === id)
 }
