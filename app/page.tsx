@@ -308,7 +308,7 @@ export default function Home() {
                     <span>Send Personalized</span>
                   </div>
                   {/* Second Line - Cycling Word */}
-                  <div className="flex items-baseline justify-center md:justify-start min-h-[1em]">
+                  <div className="flex items-baseline justify-start min-h-[1em]">
                     <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent inline-flex items-baseline">
                       <span>{displayText}</span>
                       <span className="inline-block font-bold text-primary ml-1 animate-pulse" style={{ fontSize: 'inherit' }}>|</span>
