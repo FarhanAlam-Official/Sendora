@@ -4,6 +4,13 @@ import Link from "next/link"
 import { motion, useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { CheckCircle2, Mail, FileUp, Zap, Shield, BarChart3, Sparkles, ArrowRight, Star, TrendingUp, Users, Lock } from "lucide-react"
+import {
+  organizationSchema,
+  websiteSchema,
+  webApplicationSchema,
+  howToSchema,
+  productSchema,
+} from "@/lib/structured-data"
 
 export default function Home() {
   // Clear send completion flag when visiting home page to allow new batches
@@ -578,6 +585,28 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
     </main>
   )
 }
