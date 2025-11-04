@@ -1,3 +1,54 @@
+/**
+ * @fileoverview Home Page - Landing Page with Hero, Features, and CTAs
+ * @module app/page
+ * @description
+ * This is the main landing page for Sendora, designed to showcase the platform's
+ * value proposition and convert visitors into users. Features extensive animations,
+ * interactive elements, and comprehensive SEO optimization.
+ * 
+ * Page Sections:
+ * 1. Hero Section: Animated typing effect, gradient backgrounds, CTAs
+ * 2. Features Section: 6 feature cards with hover effects
+ * 3. Trust Section: Statistics and social proof (10K+ emails, 500+ orgs)
+ * 4. CTA Section: Final call-to-action with decorative effects
+ * 
+ * Key Features:
+ * - Typing animation cycling through use cases (Certificates, Documents, Emails, Awards)
+ * - Framer Motion animations (fade-in, scale, stagger, parallax)
+ * - Animated gradient backgrounds with floating orbs
+ * - Interactive feature cards with hover effects
+ * - Animated statistics counter
+ * - Trust indicators (500+ organizations, 4.9/5 rating)
+ * - Mobile-responsive design
+ * - SEO structured data (5 schemas)
+ * 
+ * Animations:
+ * - Hero typing effect: 2s pause, 100ms typing, 50ms deleting
+ * - Background orbs: 4s breathing animation
+ * - Feature cards: Scale + lift on hover
+ * - Stats: Scroll-triggered entrance
+ * - Staggered children: 0.1s delay between elements
+ * 
+ * SEO Optimization:
+ * - Structured data schemas (Organization, Website, WebApplication, HowTo, Product)
+ * - Semantic HTML structure
+ * - Proper heading hierarchy
+ * - Alt text for visual elements
+ * - Internal linking
+ * 
+ * User Flow:
+ * 1. Land on hero → See value proposition
+ * 2. Scroll to features → Understand capabilities
+ * 3. View trust indicators → Build confidence
+ * 4. Click CTA → Start using platform
+ * 
+ * @requires react
+ * @requires next/link
+ * @requires framer-motion
+ * @requires lucide-react
+ * @requires @/lib/structured-data
+ */
+
 "use client"
 
 import Link from "next/link"
@@ -33,15 +84,26 @@ export default function Home() {
     }
   }, [])
 
-  // Typing animation words for the hero section
+  // Words to cycle through in typing animation
   const words = ["Certificates", "Documents", "Emails", "Awards"]
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [displayText, setDisplayText] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
 
   /**
-   * Typing animation effect for the hero section
-   * Cycles through different words to show the platform's versatility
+   * Typing Animation Effect
+   * 
+   * Creates a typewriter effect that cycles through words array:
+   * 1. Types word character by character (100ms delay)
+   * 2. Pauses for 2 seconds
+   * 3. Deletes word character by character (50ms delay)
+   * 4. Moves to next word
+   * 5. Repeats indefinitely
+   * 
+   * State Variables:
+   * - displayText: Current visible text
+   * - isDeleting: Direction of animation
+   * - currentWordIndex: Index in words array
    */
   useEffect(() => {
     const currentWord = words[currentWordIndex]
@@ -76,7 +138,15 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayText, isDeleting, currentWordIndex])
   
-  // Animation variants for fade-in effects
+  /**
+   * Animation Variants
+   * 
+   * Reusable Framer Motion animation configurations:
+   * - fadeInUp: Fade in from below (common for text/content)
+   * - fadeInDown: Fade in from above (for headers)
+   * - scaleIn: Scale up with fade (for cards/images)
+   * - staggerContainer: Parent for sequential animations
+   */
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -103,11 +173,19 @@ export default function Home() {
     },
   }
 
-  // Ref for stats animation
+  // Ref and in-view tracker for stats section animation
   const statsRef = useRef(null)
   const statsInView = useInView(statsRef, { once: true })
 
-  // Define key features with icons and descriptions
+  /**
+   * Features Configuration
+   * 
+   * Array of 6 platform features, each with:
+   * - icon: Lucide React icon component
+   * - title: Feature name
+   * - description: Short explanation
+   * - color: Gradient color scheme (from/to)
+   */
   const features = [
     {
       icon: FileUp,
