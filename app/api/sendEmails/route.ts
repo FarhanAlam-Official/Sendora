@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import nodemailer from "nodemailer"
+import nodemailer, { type Transporter } from "nodemailer"
 
 /**
  * Default SMTP configuration from environment variables
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
     }
 
-    let transporter: nodemailer.Transporter
+    let transporter: Transporter
     let fromEmail: string
 
     if (smtpConfig === "custom" && customSMTP) {

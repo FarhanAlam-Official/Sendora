@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import nodemailer from "nodemailer"
+import nodemailer, { type Transporter } from "nodemailer"
 
 /**
  * Interface for batch email request data
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchEmai
     }
 
     // Create transporter based on config
-    let transporter: nodemailer.Transporter
+    let transporter: Transporter
     let fromEmail: string
 
     if (smtpConfig === "custom" && customSMTP) {
