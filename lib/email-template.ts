@@ -27,7 +27,7 @@ function getSendoraWebsiteUrl(): string {
   }
   
   // Fallback to default
-  return "https://sendora.com"
+  return "https://sendoraa.vercel.app"
 }
 
 /**
