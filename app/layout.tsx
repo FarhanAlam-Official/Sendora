@@ -125,16 +125,27 @@ export const metadata: Metadata = {
     telephone: false,
   },
   // Favicon and app icons for multiple platforms
+  // Order matters: browsers prefer larger sizes for better display quality
   icons: {
     icon: [
-      { url: "/favicon/favicon.ico" },
-      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      // Prioritize larger PNG files first for better quality on high-DPI displays
       { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      // Keep ICO last for legacy browser support
+      { url: "/favicon/favicon.ico", sizes: "any" },
+      // Add larger sizes for better display in modern browsers
+      { url: "/favicon/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
     ],
     apple: [
       { url: "/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
+      {
+        rel: "icon",
+        url: "/favicon/android-chrome-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
       {
         rel: "android-chrome",
         url: "/favicon/android-chrome-192x192.png",
@@ -273,6 +284,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Favicon: Explicit links for maximum browser compatibility */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
+        <link rel="shortcut icon" href="/favicon/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
         {/* SEO: Canonical URL */}
         <link rel="canonical" href="https://sendora.vercel.app" />
         {/* PWA: Theme color for browser UI */}
