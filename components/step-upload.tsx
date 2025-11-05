@@ -440,7 +440,7 @@ export default function StepUpload() {
                   </tr>
                 </thead>
                 <tbody>
-                  {state.rows.slice(0, 20).map((row, idx) => (
+                  {state.rows.map((row, idx) => (
                     <tr key={idx} className="border-b border-border hover:bg-muted/50">
                       <td className="py-2 px-3 text-muted-foreground">{idx + 1}</td>
                       {detectedMapping.name && (
@@ -453,11 +453,6 @@ export default function StepUpload() {
                   ))}
                 </tbody>
               </table>
-              {state.rows.length > 20 && (
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Showing first 20 of {state.rows.length} rows. Scroll to see more in the table above.
-                </p>
-              )}
             </div>
           </div>
         </div>

@@ -503,7 +503,7 @@ export default function StepPdfUploadMatch() {
       {pdfs.length > 0 && state.rows.length > 0 && (
         <div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-3 max-h-96 overflow-y-auto">
           <h3 className="font-semibold text-base sm:text-lg mb-2">Matching Preview</h3>
-          {state.rows.slice(0, 20).map((row, idx) => {
+          {state.rows.map((row, idx) => {
             const nameField = state.mapping.name || ""
             const emailField = state.mapping.email || ""
             const currentMatch = state.pdfMatches.get(idx) || "__none__"
@@ -578,9 +578,6 @@ export default function StepPdfUploadMatch() {
               </motion.div>
             )
           })}
-          {activeRows.length > 20 && (
-            <p className="text-xs text-muted-foreground text-center">... and {activeRows.length - 20} more recipients</p>
-          )}
         </div>
       )}
 
