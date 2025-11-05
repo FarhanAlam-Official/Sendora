@@ -996,6 +996,7 @@ Sendora provides RESTful API endpoints for email sending and configuration testi
 Send a single personalized email with PDF attachment.
 
 **Request Body:**
+
 ```json
 {
   "to": "<recipient@example.com>",
@@ -1467,7 +1468,7 @@ Need help? We're here for you!
 
 ### Getting Help
 
-- 📧 **Email**: [sendora@gmail.com](mailto:sendora@gmail.com)
+- 📧 **Email**: [sendora.tool@gmail.com](mailto:sendora.tool@gmail.com)
 - 🐛 **Bug Reports**: [Open an issue](https://github.com/FarhanAlam-Official/sendora/issues)
 - 💬 **Questions**: [GitHub Discussions](https://github.com/FarhanAlam-Official/sendora/discussions)
 - 📝 **Contact Form**: [sendoraa.vercel.app/contact](https://sendoraa.vercel.app/contact)

@@ -928,10 +928,10 @@ export default function CertificateGeneratorStandalone() {
   // For now, let me return a simplified version that has the core structure
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto space-y-6 pt-24 pb-12 px-4">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto space-y-6 pt-20 pb-8 sm:pt-24 sm:pb-12 px-3 sm:px-4 md:px-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Generate Certificates</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Generate Certificates</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Upload your Excel/CSV file, customize your certificate design, and download all certificates as a ZIP file.
         </p>
       </div>
@@ -947,23 +947,23 @@ export default function CertificateGeneratorStandalone() {
       {!file && (
         <>
           {/* File Upload Component - Prominent */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-8 shadow-2xl">
+          <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
             {/* Decorative background elements */}
             <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
             
             <div className="relative">
               <div 
-                className="relative border-3 border-dashed rounded-xl p-16 text-center transition-all cursor-pointer group border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 hover:scale-[1.01] hover:shadow-lg"
+                className="relative border-3 border-dashed rounded-xl p-8 sm:p-12 md:p-16 text-center transition-all cursor-pointer group border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 hover:scale-[1.01] hover:shadow-lg"
                 onClick={() => document.getElementById("file-upload")?.click()}
               >
                 <div className="flex flex-col items-center justify-center gap-6">
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                    <FileUp className="w-16 h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
+                    <FileUp className="w-12 h-12 sm:w-16 sm:h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    <p className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                       Drag and drop your file here
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -1112,10 +1112,10 @@ export default function CertificateGeneratorStandalone() {
         )}
 
       {file && (
-        <div className="bg-card border border-border rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-semibold text-lg">File Uploaded</h3>
+              <h3 className="font-semibold text-base sm:text-lg">File Uploaded</h3>
               <p className="text-sm text-muted-foreground">{file.name}</p>
               <p className="text-xs text-muted-foreground mt-1">{rows.length} recipients found</p>
             </div>
@@ -1136,7 +1136,7 @@ export default function CertificateGeneratorStandalone() {
       {file && (
         <>
           {/* Template Mode Toggle */}
-          <div className="bg-card border border-border rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold mb-1">Template Mode</h3>
@@ -1159,11 +1159,11 @@ export default function CertificateGeneratorStandalone() {
 
           {/* Template Selection */}
           {!useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Palette className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold text-lg">Select Template</h3>
+                  <h3 className="font-semibold text-base sm:text-lg">Select Template</h3>
                 </div>
                 <Collapsible open={showCustomization} onOpenChange={setShowCustomization}>
                   <CollapsibleTrigger asChild>
@@ -1175,7 +1175,7 @@ export default function CertificateGeneratorStandalone() {
                   <CollapsibleContent className="mt-4 space-y-4">
                     <div className="border-t border-border pt-4">
                       <h4 className="font-semibold text-sm mb-3">Color Customization</h4>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label htmlFor="primary-color" className="text-xs mb-1 block">Primary Color</Label>
                           <div className="flex gap-2">
@@ -1310,7 +1310,7 @@ export default function CertificateGeneratorStandalone() {
                   </CollapsibleContent>
                 </Collapsible>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                 {CERTIFICATE_TEMPLATES.map((template) => (
                   <button
                     key={template.id}
@@ -1334,10 +1334,10 @@ export default function CertificateGeneratorStandalone() {
 
           {/* Custom Template Upload */}
           {useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+            <div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-lg">Upload Custom Template</h3>
+                <h3 className="font-semibold text-base sm:text-lg">Upload Custom Template</h3>
                 <CustomTemplateInfoModal
                   open={showTemplateInfo}
                   onOpenChange={setShowTemplateInfo}
@@ -1359,11 +1359,11 @@ export default function CertificateGeneratorStandalone() {
               </div>
               
               {!customTemplatePreview ? (
-                <div 
-                  className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
+                  <div 
+                  className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center hover:border-primary transition-colors cursor-pointer"
                   onClick={() => document.getElementById("custom-template-upload")?.click()}
                 >
-                  <FileUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <FileUp className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-sm font-medium mb-2">Upload your certificate template</p>
                   <p className="text-xs text-muted-foreground mb-2">
                     Export from Google Slides or Canva as PNG/JPG
@@ -1558,7 +1558,7 @@ export default function CertificateGeneratorStandalone() {
                     <p className="text-xs text-muted-foreground">
                       Click on the image above to set position, or adjust manually below
                     </p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                       <div>
                         <Label className="text-xs">X Position (mm)</Label>
                         <Input
@@ -1684,14 +1684,14 @@ export default function CertificateGeneratorStandalone() {
           )}
 
           {/* Field Mapping Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Left Column - Field Mapping */}
             <div className="space-y-6">
               {/* Field Mapping */}
-              <div className="bg-card border border-border rounded-lg p-6">
+              <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Settings className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold text-lg">Map Fields</h3>
+                  <h3 className="font-semibold text-base sm:text-lg">Map Fields</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
@@ -1816,12 +1816,12 @@ export default function CertificateGeneratorStandalone() {
             <div className="space-y-6">
               {/* Font Size Controls */}
               {!useCustomTemplate && (
-                <div className="bg-card border border-border rounded-lg p-6">
+                <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Settings className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Font Sizes</h3>
+                    <h3 className="font-semibold text-base sm:text-lg">Font Sizes</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
                       <div>
                         <Label className="text-xs mb-1 block">Certificate Title</Label>
@@ -1947,11 +1947,11 @@ export default function CertificateGeneratorStandalone() {
               )}
 
               {/* Font Management */}
-              <div className="bg-card border border-border rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <FileUp className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Custom Fonts</h3>
+                    <h3 className="font-semibold text-base sm:text-lg">Custom Fonts</h3>
                   </div>
                   <Button
                     variant="outline"
@@ -2025,16 +2025,16 @@ export default function CertificateGeneratorStandalone() {
 
           {/* Font Style Controls - Full Width */}
           {!useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Settings className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-lg">Font Styles</h3>
+                <h3 className="font-semibold text-base sm:text-lg">Font Styles</h3>
               </div>
               <div className="space-y-4">
                 {selectedTemplate && getTemplate(selectedTemplate)?.fields.certificateTitle && (
                   <div className="border-b border-border pb-4">
                     <Label className="text-sm font-semibold mb-2 block">Certificate Title</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       <div>
                         <Label className="text-xs mb-1 block">Font Family</Label>
                         <Select
@@ -2090,7 +2090,7 @@ export default function CertificateGeneratorStandalone() {
                 {selectedTemplate && getTemplate(selectedTemplate)?.fields.awardMessage && (
                   <div className="border-b border-border pb-4">
                     <Label className="text-sm font-semibold mb-2 block">Award Message</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       <div>
                         <Label className="text-xs mb-1 block">Font Family</Label>
                         <Select
@@ -2146,7 +2146,7 @@ export default function CertificateGeneratorStandalone() {
                 {selectedTemplate && getTemplate(selectedTemplate)?.fields.recipientName && (
                   <div className="border-b border-border pb-4">
                     <Label className="text-sm font-semibold mb-2 block">Recipient Name</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       <div>
                         <Label className="text-xs mb-1 block">Font Family</Label>
                         <Select
@@ -2202,7 +2202,7 @@ export default function CertificateGeneratorStandalone() {
                 {selectedTemplate && getTemplate(selectedTemplate)?.fields.subMessage && (
                   <div className="border-b border-border pb-4">
                     <Label className="text-sm font-semibold mb-2 block">Sub Message</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       <div>
                         <Label className="text-xs mb-1 block">Font Family</Label>
                         <Select
@@ -2258,7 +2258,7 @@ export default function CertificateGeneratorStandalone() {
                 {selectedTemplate && getTemplate(selectedTemplate)?.fields.courseTitle && (
                   <div className="border-b border-border pb-4">
                     <Label className="text-sm font-semibold mb-2 block">Course Title</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       <div>
                         <Label className="text-xs mb-1 block">Font Family</Label>
                         <Select
@@ -2317,13 +2317,13 @@ export default function CertificateGeneratorStandalone() {
 
           {/* Award Message & Branding - Full Width */}
           {!useCustomTemplate && (
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-6">
                 <FileText className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-lg">Award Message & Branding</h3>
+                <h3 className="font-semibold text-base sm:text-lg">Award Message & Branding</h3>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Left Column - Text Fields */}
                 <div className="space-y-4">
                   <div>
@@ -2520,7 +2520,7 @@ export default function CertificateGeneratorStandalone() {
                           <p className="text-xs text-muted-foreground">
                             Adjust logo position and size. Leave X empty to center horizontally.
                           </p>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                             <div>
                               <Label className="text-xs mb-1 block">X Position (mm)</Label>
                               <Input
@@ -2624,7 +2624,7 @@ export default function CertificateGeneratorStandalone() {
                           <p className="text-xs text-muted-foreground">
                             Adjust signature position and size. Leave X or Y empty for auto-positioning.
                           </p>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                             <div>
                               <Label className="text-xs mb-1 block">X Position (mm)</Label>
                               <Input
@@ -2684,9 +2684,9 @@ export default function CertificateGeneratorStandalone() {
           )}
 
           {/* Preview Section */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">Certificate Preview</h3>
+          <div className="bg-card border border-border rounded-lg p-3 sm:p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="font-semibold text-base sm:text-lg">Certificate Preview</h3>
               <div className="flex items-center gap-2">
                 {showPreview && previewPdf && (
                   <Button
@@ -2742,7 +2742,7 @@ export default function CertificateGeneratorStandalone() {
               <div className="border border-border rounded-lg overflow-hidden relative">
                 <iframe
                   src={previewPdfUrl}
-                  className="w-full h-[600px]"
+                  className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]"
                   title="Certificate Preview"
                   style={{ 
                     pointerEvents: "auto",
@@ -2760,10 +2760,10 @@ export default function CertificateGeneratorStandalone() {
 
           {/* Recipient Preview with Skip Functionality */}
           {rows.length > 0 && fieldMapping.recipientName && (
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+            <div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">Recipient Preview</h3>
+                  <h3 className="font-semibold text-base sm:text-lg mb-1">Recipient Preview</h3>
                   <p className="text-sm text-muted-foreground">
                     Review recipients and skip any you don't want to generate certificates for. Skipped recipients will be excluded from generation.
                   </p>
@@ -2822,7 +2822,7 @@ export default function CertificateGeneratorStandalone() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 border-t border-border">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-primary">{activeRows.length}</p>
                   <p className="text-xs text-muted-foreground">Active</p>

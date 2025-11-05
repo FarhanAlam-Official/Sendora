@@ -34,7 +34,7 @@ function SendWizardContent() {
         <WizardStepIndicator />
 
         {/* Step Content Container */}
-        <div className="bg-card border border-border rounded-xl p-8">
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6 md:p-8">
           {state.step === 1 && <StepUpload />}
           {state.step === 2 && <StepPdfUploadMatch />}
           {state.step === 3 && <StepCompose />}

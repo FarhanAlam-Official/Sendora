@@ -263,7 +263,7 @@ export default function StepPdfUploadMatch() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto space-y-6">
       {/* Mode Selector - Always visible */}
-      <div className="bg-card border border-border rounded-lg p-4">
+      <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
         <Tabs value={state.certificateMode} onValueChange={(value) => setCertificateMode(value as "upload" | "create")}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upload" className="flex items-center gap-2">
@@ -284,10 +284,10 @@ export default function StepPdfUploadMatch() {
       ) : (
         <>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold mb-2">Upload & Match PDF Certificates</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl sm:text-2xl font-bold mb-2">Upload & Match PDF Certificates</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Upload PDF certificates. They will be automatically matched with recipients by name.
           </p>
         </div>
@@ -386,7 +386,7 @@ export default function StepPdfUploadMatch() {
       </div>
 
       {/* PDF Upload Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-8 shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/20 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
@@ -408,7 +408,7 @@ export default function StepPdfUploadMatch() {
               handleFiles(e.dataTransfer.files)
             }}
             onClick={() => fileInputRef.current?.click()}
-            className={`relative border-3 border-dashed rounded-xl p-16 text-center transition-all cursor-pointer group ${
+            className={`relative border-3 border-dashed rounded-xl p-8 sm:p-12 md:p-16 text-center transition-all cursor-pointer group ${
               isDragging 
                 ? "border-primary bg-primary/20 scale-[1.02] shadow-xl" 
                 : "border-primary/50 hover:border-primary bg-primary/5 hover:bg-primary/10 hover:scale-[1.01] hover:shadow-lg"
@@ -417,10 +417,10 @@ export default function StepPdfUploadMatch() {
             <div className="flex flex-col items-center justify-center gap-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <FileUp className="w-16 h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
+                <FileUp className="w-12 h-12 sm:w-16 sm:h-16 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={2} />
               </div>
               <div className="space-y-2">
-                <p className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                <p className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                   Drag and drop PDF files here
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -456,10 +456,10 @@ export default function StepPdfUploadMatch() {
       )}
 
       {pdfs.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 text-left">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 sm:mt-8 text-left">
           <div className="flex items-center gap-2 mb-4">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <span className="font-semibold text-green-600">{pdfs.length} PDF files uploaded</span>
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            <span className="font-semibold text-sm sm:text-base text-green-600">{pdfs.length} PDF files uploaded</span>
           </div>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {pdfs.map((pdf, idx) => (
@@ -501,8 +501,8 @@ export default function StepPdfUploadMatch() {
 
       {/* Matching Preview */}
       {pdfs.length > 0 && state.rows.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-6 space-y-3 max-h-96 overflow-y-auto">
-          <h3 className="font-semibold mb-2">Matching Preview</h3>
+        <div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-3 max-h-96 overflow-y-auto">
+          <h3 className="font-semibold text-base sm:text-lg mb-2">Matching Preview</h3>
           {state.rows.slice(0, 20).map((row, idx) => {
             const nameField = state.mapping.name || ""
             const emailField = state.mapping.email || ""
@@ -516,7 +516,7 @@ export default function StepPdfUploadMatch() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className={`flex items-center gap-4 p-4 rounded-lg border ${
+                className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border ${
                   isSkipped ? "bg-red-50/50 border-red-200 opacity-60" : "bg-muted/50 border-border"
                 }`}
               >
@@ -529,14 +529,14 @@ export default function StepPdfUploadMatch() {
                       const shouldSkip = checked === true
                       handleSkipToggle(idx, shouldSkip)
                     }}
-                    className="w-6 h-6 border-2 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground cursor-pointer"
+                    className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground cursor-pointer"
                   />
                 </div>
-                <div className="flex-1">
-                  <p className={`font-semibold ${isSkipped ? "line-through text-muted-foreground" : ""}`}>
+                <div className="flex-1 min-w-0 w-full sm:w-auto">
+                  <p className={`font-semibold text-sm sm:text-base truncate ${isSkipped ? "line-through text-muted-foreground" : ""}`}>
                     {row[nameField] || "Unknown"}
                   </p>
-                  <p className="text-sm text-muted-foreground">{row[emailField] || "No email"}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{row[emailField] || "No email"}</p>
                   {hasNoPdf && !isSkipped && (
                     <p className="text-xs text-amber-600 mt-1">⚠️ No PDF matched</p>
                   )}
@@ -544,26 +544,28 @@ export default function StepPdfUploadMatch() {
                     <p className="text-xs text-red-600 mt-1">⏭️ Skipped - will not receive email</p>
                   )}
                 </div>
-                <Select
-                  value={currentMatch}
-                  onValueChange={(value) => handleManualMatch(idx, value)}
-                  disabled={isSkipped}
-                >
-                  <SelectTrigger className="w-64" disabled={isSkipped}>
-                    <SelectValue placeholder="Select PDF..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">No PDF</SelectItem>
-                    {pdfs.map((pdf) => (
-                      <SelectItem key={pdf.name} value={pdf.name}>
-                        {pdf.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="w-full sm:w-auto sm:flex-shrink-0">
+                  <Select
+                    value={currentMatch}
+                    onValueChange={(value) => handleManualMatch(idx, value)}
+                    disabled={isSkipped}
+                  >
+                    <SelectTrigger className="w-full sm:w-64" disabled={isSkipped}>
+                      <SelectValue placeholder="Select PDF..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">No PDF</SelectItem>
+                      {pdfs.map((pdf) => (
+                        <SelectItem key={pdf.name} value={pdf.name}>
+                          {pdf.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {currentMatch && currentMatch !== "__none__" && !isSkipped && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-start sm:justify-end">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     {matchConfidences.has(idx) && (
                       <ConfidenceBadge
                         confidence={matchConfidences.get(idx)!.confidence}
@@ -614,19 +616,19 @@ export default function StepPdfUploadMatch() {
         </motion.div>
       )}
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep(1)}>
+      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
+        <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">
           Back
         </Button>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {pdfs.length === 0 && (
-            <Button variant="outline" onClick={() => setStep(3)} className="bg-transparent">
+            <Button variant="outline" onClick={() => setStep(3)} className="bg-transparent w-full sm:w-auto">
               Skip (No PDFs)
             </Button>
           )}
           <Button
             onClick={handleContinue}
-            className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
+            className="bg-gradient-to-r from-primary to-accent text-primary-foreground w-full sm:w-auto"
           >
             Continue to Compose
           </Button>

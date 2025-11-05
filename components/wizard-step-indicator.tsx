@@ -113,11 +113,11 @@ export default function WizardStepIndicator() {
   ]
 
   return (
-    <div className="flex items-center justify-between mb-8 px-4">
+    <div className="flex items-center justify-between mb-4 sm:mb-8 px-2 sm:px-4">
       {steps.map((step, idx) => (
         <div key={step.number} className="flex items-center flex-1">
           <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
+            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
               step.number <= state.step
                 ? "bg-gradient-to-r from-primary to-accent text-primary-foreground"
                 : "bg-muted text-muted-foreground"
@@ -125,9 +125,9 @@ export default function WizardStepIndicator() {
           >
             {step.number}
           </div>
-          <div className="ml-3 mr-auto">
+          <div className="ml-2 sm:ml-3 mr-auto hidden md:block">
             <p
-              className={`text-xs font-medium ${
+              className={`text-xs sm:text-sm font-medium ${
                 step.number <= state.step ? "text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -136,7 +136,7 @@ export default function WizardStepIndicator() {
           </div>
           {idx < steps.length - 1 && (
             <div
-              className={`h-0.5 flex-1 mx-2 transition-all ${step.number < state.step ? "bg-primary" : "bg-border"}`}
+              className={`h-0.5 flex-1 mx-1 sm:mx-2 transition-all ${step.number < state.step ? "bg-primary" : "bg-border"}`}
             />
           )}
         </div>
