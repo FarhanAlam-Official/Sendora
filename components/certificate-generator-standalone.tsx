@@ -2771,7 +2771,7 @@ export default function CertificateGeneratorStandalone() {
               </div>
               
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {rows.slice(0, 100).map((row, idx) => {
+                {rows.map((row, idx) => {
                   const nameField = fieldMapping.recipientName || ""
                   const isSkipped = skippedRows.has(idx)
 
@@ -2814,11 +2814,6 @@ export default function CertificateGeneratorStandalone() {
                     </motion.div>
                   )
                 })}
-                {rows.length > 100 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    ... and {rows.length - 100} more recipients
-                  </p>
-                )}
               </div>
 
               {/* Stats */}

@@ -2588,7 +2588,7 @@ export default function StepCertificateCreate() {
           </div>
           
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {state.rows.slice(0, 50).map((row, idx) => {
+            {state.rows.map((row, idx) => {
               const nameField = state.mapping.name || fieldMapping.recipientName || ""
               const emailField = state.mapping.email || ""
               const currentMatch = state.pdfMatches.get(idx) || "__none__"
@@ -2665,11 +2665,6 @@ export default function StepCertificateCreate() {
                 </motion.div>
               )
             })}
-            {state.rows.length > 50 && (
-              <p className="text-xs text-muted-foreground text-center">
-                ... and {state.rows.length - 50} more recipients
-              </p>
-            )}
           </div>
 
           {/* Stats and Warnings */}
